@@ -28,7 +28,8 @@ class OpenCVXray(Dataset):
         
 
         # Initialise variables
-        # Your code here
+        # Your code here 
+        # Start by...
 
 
         # Class variables
