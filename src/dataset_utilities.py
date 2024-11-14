@@ -128,25 +128,25 @@ if __name__ == "__main__":
 
     print("Train size: ", len(d))
 
-    for idx in range(len(d)):
-        d_image, d_label = d.__getitem__(idx)
-        print(np.array(d_image).shape)
-        print(d_label)
+    # for idx in range(len(d)):
+    #     d_image, d_label = d.__getitem__(idx)
+    #     print(np.array(d_image).shape)
+    #     print(d_label)
 
 
 
     # val
     v = OpenCVXray(
         base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/OpenCVXray",
-        split="val"   
-    )
+        split="val"
+    )   
 
     print("Val size: ", len(v))
 
-    for idx in range(len(v)):
-        v_image,v_label= v.__getitem__(idx)
-        print (np.array(v_image).shape) 
-        print (v_label)
+    # for idx in range(len(v)):
+    #     v_image,v_label= v.__getitem__(idx)
+    #     print (np.array(v_image).shape) 
+    #     print (v_label)
 
 
 
@@ -158,7 +158,44 @@ if __name__ == "__main__":
 
     print("Test size: ", len(t))
 
-    for idx in range(len(t)):
-        t_image, t_label = t.__getitem__(idx)
-        print(np.array(t_image).shape)
-        print(t_label)
+    # for idx in range(len(t)):
+    #     t_image, t_label = t.__getitem__(idx)
+    #     print(np.array(t_image).shape)
+    #     print(t_label)
+
+
+
+
+
+
+    # Inicializar listas para armazenar as estatísticas 
+        
+    channel_values= {"covid": [], "pneumonia": [], "normal":[]}
+    height_values= {"covid": [], "pneumonia": [], "normal":[]}
+    width_values= {"covid": [], "pneumonia": [], "normal":[]}
+
+    # Percorre o dataset e armazena valores com base no rótulo
+    for idx in range(len(d)):
+        image, label = d.__getitem__(idx)
+        label_name = ["covid", "pneumonia", "normal"][label] # Mapeia o rótulo numérico para o nome
+            
+        # Converte imagem para numpy e armazena nos dicionários
+        image_np= np.array(image)
+        channel_values[label_name].append(image_np.shape[0]) # Número de canais por imagem
+        height_values[label_name].append(image_np.shape[1]) # Altura por imagem
+        width_values[label_name].append(image_np.shape[2]) # Largura por imagem
+
+    # Calcula e imprime as estatísticas para cada rótulo
+    for label_name in ["covid", "pneumonia", "normal"]:
+        print(f"rótulo: {label_name}")
+        print(f"Canal - Média: {np.mean(channel_values[label_name]):.4f},"
+              f" Mínimo: {np.min(channel_values[label_name]):.4f},"
+              f" Máximo: {np.max(channel_values[label_name]):.4f}")
+                
+        print(f"Altura - Média: {np.mean(height_values[label_name]):.4f},"
+              f" Mínimo: {np.min(height_values[label_name]):.4f},"
+              f" Máximo: {np.max(height_values[label_name]):.4f}")
+                
+        print(f"Largura - Média: {np.mean(width_values[label_name]):.4f},"
+              f" Mínimo: {np.min(width_values[label_name]):.4f},"
+              f" Máximo: {np.max(width_values[label_name]):.4f}")
