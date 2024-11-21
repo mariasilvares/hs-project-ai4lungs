@@ -29,7 +29,7 @@ class OpenCVXRayNN(nn.Module):
         self.width = width
         self.nr_classes = nr_classes
 
-        # TODO: Change this architecture so it takes into account the previous variables
+        # Change this architecture so it takes into account the previous variables
         # 1 input image channel, 6 output channels, 5x5 square convolution
         # kernel
         self.conv1 = nn.Conv2d(channels, 6, 5) # Toma channels como entrada em vez de ser fixo em 1
