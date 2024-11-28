@@ -109,7 +109,7 @@ class OpenCVXray(Dataset):
 
 
 
-# TODO: ChestXRayAbnormalities: Dataset Class
+# ChestXRayAbnormalities: Dataset Class
 class ChestXRayAbnormalities(Dataset):
 
     # Method: __init__

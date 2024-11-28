@@ -16,11 +16,11 @@ random_seed = 42
 torch.manual_seed(random_seed)
 np.random.seed(random_seed)
 
+
+# Import the other dataset(s)
 # Project Imports
-from model_utilities import OpenCVXRayNN # Importa o nome do modelo
-from dataset_utilities import OpenCVXray # Importa a classe do modelo
-
-
+from model_utilities import OpenCVXRayNN, ChestXRayNN
+from dataset_utilities import OpenCVXray, ChestXRayAbnormalities
 
 
 # Some constants
@@ -34,13 +34,16 @@ dataset_name = "OpenCVXray" # Importa a classe do modelo
 
 
 
-# TODO: With the names, create the correct model and dataset
+# With the names, create the correct model and dataset
 # Model
 # Create the dimensions of the data
 channels = 3 
 height = 64 
 width = 64  
 nr_classes = 3 
+
+
+# Prepare the conditions to receive more than one model name(s) and/or dataset name(s)
 
 if model_name == "OpenCVXRayNN":
     model = OpenCVXRayNN(
@@ -50,8 +53,16 @@ if model_name == "OpenCVXRayNN":
         nr_classes=nr_classes
     )
     print("Modelo OpenCVXRayNN inicializado.")
-    
-
+elif model_name == "ChestXRayNN":
+    model = ChestXRayNN(
+        channels=channels,
+        height=height,
+        width=width,
+        nr_classes=nr_classes
+    )
+    print("Modelo ChestXRayNN inicializado.")
+else:
+    raise ValueError(f"Modelo {model_name} não reconhecido!")
 
 
 # Results and Weights
@@ -76,14 +87,14 @@ MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
 
 
-# TODO: Hyper-parameters
-EPOCHS = 10
+# Hyper-parameters
+EPOCHS = 1
 
-# TODO: Check if BCEWithLogitsLoss applies to 3 classes
+# Check if BCEWithLogitsLoss applies to 3 classes
 LOSS = torch.nn.CrossEntropyLoss()
 LEARNING_RATE = 0.001
 
-# TODO: You should pass a model to the optimizer
+# You should pass a model to the optimizer
 OPTIMISER = torch.optim.Adam(model.parameters(),lr = LEARNING_RATE)
 BATCH_SIZE = 32
 
@@ -124,7 +135,7 @@ else:
 
 
 
-# TODO: Create train and validation datasets
+# Create train and validation datasets
 # Criar os datasets de treino e validação
 
 if dataset_name == "OpenCVXray":
@@ -140,6 +151,20 @@ if dataset_name == "OpenCVXray":
         transform=val_transforms  # As transformações de validação 
     )
 
+elif dataset_name == "ChestXRayAbnormalities":
+    train_set = ChestXRayAbnormalities(
+        base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/ChestXRayAbnormalities",
+        split="train",
+        transform=train_transforms
+    )
+
+    val_set = ChestXRayAbnormalities(
+        base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/ChestXRayAbnormalities",
+        split="val",
+        transform=val_transforms
+    )
+else:
+    raise ValueError(f"Dataset {dataset_name} não reconhecido!")
 
 # DataLoaders
 train_loader = DataLoader(dataset=train_set, batch_size=BATCH_SIZE, shuffle=True)
@@ -227,11 +252,11 @@ for epoch in range(EPOCHS):
     # Compute Average Train Loss
     avg_train_loss = run_train_loss/len(train_loader.dataset)
 
-    # TODO: Compute Train Metrics
+    # Compute Train Metrics
     train_acc = accuracy_score(y_true=y_train_true, y_pred=y_train_pred)
-    train_recall = recall_score(y_true=y_train_true, y_pred=y_train_pred)
-    train_precision = precision_score(y_true=y_train_true, y_pred=y_train_pred)
-    train_f1 = f1_score(y_true=y_train_true, y_pred=y_train_pred)
+    train_recall = recall_score(y_true=y_train_true, y_pred=y_train_pred, average='macro')
+    train_precision = precision_score(y_true=y_train_true, y_pred=y_train_pred, average='macro')
+    train_f1 = f1_score(y_true=y_train_true, y_pred=y_train_pred, average='macro')
 
     # Print Statistics
     print(f"Train Loss: {avg_train_loss}\tTrain Accuracy: {train_acc}\tTrain Recall: {train_recall}\tTrain Precision: {train_precision}\tTrain F1-Score: {train_f1}")
@@ -314,7 +339,7 @@ for epoch in range(EPOCHS):
             # loss = LOSS(logits, labels)
 
             # Using BCE w/ Sigmoid
-            loss = LOSS(logits.reshape(-1).float(), labels.float())
+            loss = LOSS(logits, labels) # Calculo da perda de validação
             
             # Update batch losses
             run_val_loss += (loss.item() * images.size(0))
@@ -328,9 +353,12 @@ for epoch in range(EPOCHS):
             # s_logits = torch.argmax(s_logits, dim=1)
             # y_val_pred += list(s_logits.cpu().detach().numpy())
 
-            # Using Sigmoid Activation (we apply a threshold of 0.5 in probabilities)
-            y_val_pred += list(logits.cpu().detach().numpy())
-            y_val_pred = [1 if i >= 0.5 else 0 for i in y_val_pred]
+
+
+            # Ativação Softmax e predição de classes
+            s_logits = torch.nn.Softmax(dim=1)(logits) #converte as saídas em probbabilidades
+            s_logits = torch.argmax(s_logits, dim=1) # determinar a classe perdida
+            y_val_pred += list(s_logits.cpu().detach().numpy())
 
         
 
@@ -338,10 +366,10 @@ for epoch in range(EPOCHS):
         avg_val_loss = run_val_loss/len(val_loader.dataset)
 
         # Compute Training Accuracy
-        val_acc = accuracy_score(y_true=y_val_true, y_pred=y_val_pred)
-        val_recall = recall_score(y_true=y_val_true, y_pred=y_val_pred)
-        val_precision = precision_score(y_true=y_val_true, y_pred=y_val_pred)
-        val_f1 = f1_score(y_true=y_val_true, y_pred=y_val_pred)
+        val_acc = accuracy_score(y_true=y_val_true, y_pred=y_val_pred) 
+        val_recall = recall_score(y_true=y_val_true, y_pred=y_val_pred, average='macro')
+        val_precision = precision_score(y_true=y_val_true, y_pred=y_val_pred, average='macro')
+        val_f1 = f1_score(y_true=y_val_true, y_pred=y_val_pred, average='macro')
 
         # Print Statistics
         print(f"Validation Loss: {avg_val_loss}\tValidation Accuracy: {val_acc}\tValidation Recall: {val_recall}\tValidation Precision: {val_precision}\tValidation F1-Score: {val_f1}")
