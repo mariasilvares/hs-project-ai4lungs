@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset='utf-8'>
-        <title>Homepage</title>
-    </html>
-    <body>
-        <h1>This is the Homepage</h1>s
-        <p>Welcome to Djangonautic</p>
-    </body>
-</html>
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<h2>Bem-vindo ao AI4Lungs!</h2>
+<p> O sistema de identificação de cancro do pulmão por radiografia tem como objetivo analisar imagens médicas e ajudar no diagnóstico de doenças, nomeadamente o cancro do pulmão. Este sistema tem como objetivo identificar padrões nos exames de imagem (como raios-X), para um diagnóstico precoce e mais preciso. 
+    O usuário carrega uma radiografia digitalizada, que passa por um processamento de imagem para identificar possíveis anomalias. De seguida, a imagem é analisada para identificar sinais de cancro. Após a análise, o sistema exibe o resultado, informando o utilizador se existem ou não sinais de cancro.  
+    Este produto auxilia no diagnóstico precoce, oferecendo uma ferramenta eficiente e acessível para profissionais. </p>
+{% endblock %}
 

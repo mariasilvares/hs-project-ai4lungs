@@ -1,7 +1,7 @@
 body{
     background-color: #000000;
-    background-image: url(pulmão.png);
-    background-repeat: repeat no-repeat;
+    /* background-image: url(pulmão.png);*/
+    background-repeat: repeat; 
     color: #fff;
 }
 
@@ -55,7 +55,7 @@ nav button{
 
 body{
     background-color: #000000;
-    background-image: url(pulmão.png);
+    /* background-image: url(pulmão.png); */
     background-repeat: repeat no-repeat;
     color: #fff;
 }

@@ -1,0 +1,38 @@
+{% extends 'base_layout.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-picture">
+            <!-- Exemplo de imagem de perfil (pode ser editado conforme necessidade) -->
+            <img src="{{ user.profile.image.url }}" alt="Foto de perfil">
+        </div>
+        <div class="profile-info">
+            <h2>{{ user.username }}</h2>
+            <p>Email: {{ user.email }}</p>
+            <p>Membro desde: {{ user.date_joined|date:"F j, Y" }}</p>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <a href="{% url 'profile_edit' %}" class="btn">Editar Perfil</a>
+        <a href="{% url 'change_password' %}" class="btn">Alterar Senha</a>
+        <form action="{% url 'accounts:logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="activity-history">
+        <h3>Atividades Recentes</h3>
+        <!-- Exemplo de atividades -->
+        <ul>
+            <li>Upload de imagem: 10 de Dezembro, 2024</li>
+            <li>Alteração de perfil: 5 de Dezembro, 2024</li>
+            <li>Publicação de artigo: 1 de Dezembro, 2024</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

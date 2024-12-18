@@ -1,32 +1,37 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset='utf-8'>
-        <title>Articles</title>
-        <link rel="stylesheet" href= "{% static 'styles.css' %}">
-    </head>
-    <body>
-        <div class = 'wrapper'>
-            <!-- <h1><a href="{% url 'home' %}"><img src="{% static 'logo.png'%}"/></a></h1> -->
-            <nav>
-                <ul>
-                    {% if user.is_authenticated %}
-                        <li>
-                            <form class = 'logout-link' action="{% url 'accounts:logout' %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit">Logout</button>
-                            </form>
-                        </li>
-                        <li><a href="{% url 'articles:create' %}" class="highlight">New Article</a></li>
-                    {% else %}
-                        <li><a href='{% url "accounts:login" %}'>Login</a></li>
-                        <li><a href='{% url "accounts:signup" %}'>Signup</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% block content %}
-            {% endblock %}
-        </div>
-    </body>
+<head>
+    <meta charset='utf-8'>
+    <title>AI4Lungs</title>
+    <link rel="stylesheet" href= "{% static 'styles.css' %}">
+</head>
+<body>
+<div class='wrapper'>
+    <header>
+        <h1><a href="{% url 'home' %}">AI4Lungs</a></h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}">Perfil</a></li>
+                    <li><a href="{% url 'upload_image' %}">Upload</a></li>
+                    <li>
+                        <form class="logout-link" action="{% url 'accounts:logout' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href='{% url "accounts:login" %}'>Login</a></li>
+                    <li><a href='{% url "accounts:signup" %}'>Signup</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
 </html>
