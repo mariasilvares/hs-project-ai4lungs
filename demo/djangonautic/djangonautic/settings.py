@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'articles',
     'accounts',
     'xray_images',#adicionado
-    'user_profile',
 ]
 
 MIDDLEWARE = [

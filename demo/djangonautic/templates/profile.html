@@ -6,8 +6,8 @@
 <div class="profile-container">
     <div class="profile-header">
         <div class="profile-picture">
-            <!-- Exemplo de imagem de perfil (pode ser editado conforme necessidade) -->
-            <img src="{{ user.profile.image.url }}" alt="Foto de perfil">
+            <!-- Exemplo de imagem de perfil -->
+            <img src="{% static 'default-profile.png' %}" alt="Foto de perfil">
         </div>
         <div class="profile-info">
             <h2>{{ user.username }}</h2>
@@ -31,7 +31,6 @@
         <ul>
             <li>Upload de imagem: 10 de Dezembro, 2024</li>
             <li>Alteração de perfil: 5 de Dezembro, 2024</li>
-            <li>Publicação de artigo: 1 de Dezembro, 2024</li>
         </ul>
     </div>
 </div>

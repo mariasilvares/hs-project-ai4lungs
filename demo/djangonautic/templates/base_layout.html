@@ -8,30 +8,61 @@
 </head>
 <body>
 <div class='wrapper'>
-    <header>
-        <h1><a href="{% url 'home' %}">AI4Lungs</a></h1>
-        <nav>
-            <ul>
-                <li><a href="{% url 'home' %}">Home</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'profile' %}">Perfil</a></li>
-                    <li><a href="{% url 'upload_image' %}">Upload</a></li>
-                    <li>
-                        <form class="logout-link" action="{% url 'accounts:logout' %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Logout</button>
-                        </form>
-                    </li>
-                {% else %}
-                    <li><a href='{% url "accounts:login" %}'>Login</a></li>
-                    <li><a href='{% url "accounts:signup" %}'>Signup</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </header>
+    <!-- base_layout.html -->
+<header>
+    <h1><a href="{% url 'home' %}">AI4Lungs</a></h1>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">Perfil</a></li>
+                <li><a href="{% url 'xray_images:upload_image' %}" class="{% if request.path == '/xray_images/upload_image/' %}active{% endif %}">Upload</a></li>
+                <li>
+                    <form class="logout-link" action="{% url 'accounts:logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="{% if request.path == '/accounts/logout/' %}active{% endif %}">Logout</button>
+                    </form>
+                </li>
+            {% else %}
+                <li><a href='{% url "accounts:login" %}' class="{% if request.path == '/accounts/login/' %}active{% endif %}">Login</a></li>
+                <li><a href='{% url "accounts:signup" %}' class="{% if request.path == '/accounts/signup/' %}active{% endif %}">Signup</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+<!-- Modal de confirmação de logout -->
+<div class="modal" id="logoutModal">
+    <div class="modal-content">
+        <h2>Tem a certeza que deseja sair?</h2>
+        <form action="{% url 'accounts:logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" id="confirm-logout">Sim, sair</button>
+        </form>
+        <button id="cancel-logout">Cancelar</button>
+    </div>
+</div>
 
     {% block content %}
     {% endblock %}
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var logoutButton = document.querySelector('.logout-link button');
+        var modal = document.getElementById('logoutModal');
+        var cancelButton = document.getElementById('cancel-logout');
+
+        // Exibir o modal quando o botão de logout for clicado
+        logoutButton.addEventListener('click', function (event) {
+            event.preventDefault();  // Previne o envio do formulário diretamente
+            modal.style.display = 'flex';  // Exibe o modal
+        });
+
+        // Fechar o modal quando o botão de cancelar for clicado
+        cancelButton.addEventListener('click', function () {
+            modal.style.display = 'none';  // Oculta o modal
+        });
+    });
+</script>
 </body>
 </html>
