@@ -17,7 +17,7 @@
     </div>
 
     <div class="profile-actions">
-        <a href="{% url 'profile_edit' %}" class="btn">Editar Perfil</a>
+        <a href="{% url 'accounts:profile_edit' %}" class="btn">Editar Perfil</a>
         <a href="{% url 'change_password' %}" class="btn">Alterar Senha</a>
         <form action="{% url 'accounts:logout' %}" method="post">
             {% csrf_token %}
