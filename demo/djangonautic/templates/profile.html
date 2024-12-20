@@ -7,7 +7,11 @@
     <div class="profile-header">
         <div class="profile-picture">
             <!-- Exemplo de imagem de perfil -->
-            <img src="{% static 'default-profile.png' %}" alt="Foto de perfil">
+            {% if user.userprofile.profile_picture %}
+                <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de perfil">
+            {% else %}
+                <img src="{% static 'default-profile.png' %}" alt="Imagem padrão">
+            {% endif %}
         </div>
         <div class="profile-info">
             <h2>{{ user.username }}</h2>
@@ -27,10 +31,12 @@
 
     <div class="activity-history">
         <h3>Atividades Recentes</h3>
-        <!-- Exemplo de atividades -->
         <ul>
-            <li>Upload de imagem: 10 de Dezembro, 2024</li>
-            <li>Alteração de perfil: 5 de Dezembro, 2024</li>
+            {% for activity in user.activity_set.all|slice:":5" %}
+                <li>{{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}</li>
+            {% empty %}
+                <li>Nenhuma atividade recente.</li>
+            {% endfor %}
         </ul>
     </div>
 </div>

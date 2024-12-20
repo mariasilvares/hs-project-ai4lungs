@@ -4,18 +4,26 @@
 <h2>Upload da Radiografia</h2>
 <p>Carregue uma radiografia de pulmão para análise. O sistema tem como objetivo analisar a imagem médica e ajudar no reconhecimento de cancro, para um diagnóstico antecipado e mais preciso.</p>
 
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+        <li class="message">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <div class="upload-container">
-    <form method="post" enctype="multipart/form-data" action="{% url 'upload_image' %}">
-        {% csrf_token %}
-        <div class="upload-box" id="upload-box">
-            <span id="upload-instruction">Arraste sua imagem aqui ou clique para selecionar</span>
-            <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)">
-            <div id="image-preview" class="image-preview">
-                <!-- Pré-visualização será inserida aqui -->
-            </div>
+<form method="post" enctype="multipart/form-data" action="{% url 'upload_image' %}">
+    {% csrf_token %}
+    <div class="upload-box" id="upload-box">
+        <span id="upload-instruction">Arraste sua imagem aqui ou clique para selecionar</span>
+        <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)">
+        <div id="image-preview" class="image-preview">
+            <!-- Pré-visualização será inserida aqui -->
         </div>
-        <button type="submit">Enviar</button>
-    </form>
+    </div>
+    <button type="submit">Enviar</button>
+</form>
 </div>
 
 <script>

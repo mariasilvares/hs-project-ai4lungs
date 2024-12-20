@@ -26,6 +26,18 @@
       {% endif %}
       {{ profile_form.profile_picture }}
     </div>
+    
+    {% if user_form.errors %}
+    <div class="form-errors">
+        <ul>
+            {% for field in user_form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.name|capfirst }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
 
     <button type="submit">Salvar Alterações</button>
   </form>
