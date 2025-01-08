@@ -204,33 +204,6 @@ a.highlight{
     margin: 10px 0;
 }
 
-
-
-/* Upload */
-/* .upload-container {
-    text-align: center;
-    padding: 50px;
-}
-
-.upload-box {
-    border: 2px dashed #fff;
-    padding: 50px;
-    width: 300px;
-    margin: 0 auto;
-    display: inline-block;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.upload-box input[type="file"] {
-    display: none;
-}
-
-.upload-box span {
-    display: block;
-    color: #fff;
-} */
-
 .upload-box {
     border: 2px dashed #ffff;
     padding: 20px;
@@ -516,4 +489,113 @@ a.active {
     text-decoration: underline;
 }
 
+/* Mensagens de sucesso ou erro */
+.messages-container {
+    margin: 20px auto;
+    padding: 10px;
+    width: 80%;
+    max-width: 600px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.messages-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.messages-container .message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+}
+
+.messages-container .message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.messages-container .message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.messages-container .message.warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.patients-list-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #313030;
+    border-radius: 10px;
+    color: white;
+}
+
+.patients-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Flexível para responsividade */
+    grid-gap: 20px;
+}
+
+.patient-card {
+    background-color: #222;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+}
+
+.patient-card:hover {
+    background-color: #444; /* Cor de hover para destaque */
+}
+
+.patient-info {
+    flex: 1;
+    padding-right: 20px;
+}
+
+.patient-info h3 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.patient-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+}
+
+.patient-actions .btn {
+    background-color: #aeb4c7;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    font-size: 1em;
+    width: 100%;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.patient-actions .btn:hover {
+    background-color: #8b9ba7;
+}
+
+.view-images {
+    background-color: #6f8eaf; /* Cor diferenciada para exibir imagem */
+}
+
+.delete {
+    background-color: #e57373; /* Cor diferenciada para excluir */
+}
 

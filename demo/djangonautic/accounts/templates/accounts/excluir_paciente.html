@@ -1,0 +1,11 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+    <h2>Tem certeza de que deseja excluir o paciente {{ paciente.nome }}?</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Sim, excluir</button>
+        <a href="{% url 'accounts:pacientes' %}">Cancelar</a>
+    </form>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<h1>Pacientes</h1>
+
+<!-- Exibe a mensagem de sucesso, se houver -->
+{% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<!-- Formulário para adicionar pacientes -->
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Adicionar Paciente</button>
+</form>
+
+<hr>
+
+<!-- Lista de pacientes -->
+<h2>Lista de Pacientes</h2>
+<div class="patients-list-container">
+    <div class="patients-list">
+        {% for paciente in pacientes %}
+            <div class="patient-card">
+                <div class="patient-info">
+                    <h3>{{ paciente.name }}</h3>
+                    <p>ID: {{ paciente.number }}</p>
+                    <p>Registrado em: {{ paciente.registration_date|date:"d/m/Y" }}</p>
+                </div>
+                <div class="patient-actions">
+                    <a href="{% url 'accounts:medical_image' paciente.id %}" class="btn view-images">Exibir Imagens Médicas</a>
+                    
+                    <!-- Formulário para excluir paciente -->
+                    <form action="{% url 'accounts:excluir_paciente' paciente.id %}" method="post" id="delete-form-{{ paciente.id }}">
+                        {% csrf_token %}
+                        <a href="#" onclick="document.getElementById('delete-form-{{ paciente.id }}').submit(); return confirm('Tem certeza que deseja excluir este paciente?');" class="btn delete">
+                            Excluir
+                        </a>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <div class="no-patients">Você ainda não adicionou nenhum paciente.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -38,3 +38,19 @@ class Activity(models.Model):
             return 'Upload de Imagem'
         return self.action  # Retorna o valor original de 'action'
 
+class Patient(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='patients')  # Relaciona com User
+    name = models.CharField(max_length=255)  # Nome do paciente
+    number = models.CharField(max_length=50, unique=True)  # Número único do paciente
+    registration_date = models.DateTimeField(auto_now_add=True)  # Data de registro
+
+    def __str__(self):
+        return self.name
+    
+class MedicalImage(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='medical_images/')
+    description = models.TextField()
+
+    def __str__(self):
+        return f"Image for {self.patient.name}"

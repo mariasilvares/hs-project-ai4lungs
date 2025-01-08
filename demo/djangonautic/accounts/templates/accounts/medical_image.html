@@ -1,0 +1,25 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+    <h1>MedicalImages</h1>
+    
+    <h2>Paciente: {{ paciente.name }}</h2>
+    <p><strong>Número do Paciente:</strong> {{ paciente.number }}</p>
+    <p><strong>Data de Registro:</strong> {{ paciente.registration_date|date:"d/m/Y" }}</p>
+
+    <hr>
+
+    {% if images %}
+        <h3>Imagens Médicas:</h3>
+        <ul>
+            {% for image in images %}
+                <li>
+                    <img src="{{ image.image.url }}" alt="Image for {{ paciente.name }}" width="200">
+                    <p><strong>Descrição:</strong> {{ image.description }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Não há imagens médicas registradas para este paciente.</p>
+    {% endif %}
+{% endblock %}

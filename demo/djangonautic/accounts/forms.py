@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
 from .models import UserProfile
+from .models import Patient
 
 class UserEditForm(UserChangeForm):
     class Meta:
@@ -14,5 +15,12 @@ class UserProfileForm(forms.ModelForm):
         model = UserProfile
         fields = ['profile_picture']  # Campo para editar a foto de perfil
 
-
+class PatientForm(forms.ModelForm):
+    class Meta:
+        model = Patient
+        fields = ['name', 'number']
+        labels = {
+            'name': 'Nome',
+            'number': 'Número',
+        }
 

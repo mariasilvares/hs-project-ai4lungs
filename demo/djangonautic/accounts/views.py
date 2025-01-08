@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,8 +6,9 @@ from .forms import UserEditForm, UserProfileForm
 from .models import Activity
 from django.contrib import messages
 from django.utils.timezone import now
-from .models import Activity, UserProfile
-from django.core.exceptions import ValidationError
+from .models import Activity
+from .models import Patient, MedicalImage
+from .forms import PatientForm
 
 
 # Create your views here.
@@ -89,6 +90,7 @@ def profile_edit(request):
         'profile_form': profile_form
     })
 
+
 def upload_image(request):
     if request.method == 'POST' and request.FILES['image']:
         #  processando a imagem aqui
@@ -104,3 +106,56 @@ def upload_image(request):
     return render(request, 'upload_image.html')
 
 
+@login_required
+def pacientes(request):
+    # Obtém os pacientes do usuário atual
+    pacientes = Patient.objects.filter(user=request.user)
+
+    if request.method == 'POST':
+        form = PatientForm(request.POST)
+        if form.is_valid():
+            # Associar o paciente ao usuário logado
+            paciente = form.save(commit=False)
+            paciente.user = request.user
+            paciente.save()
+            messages.success(request, 'Paciente adicionado com sucesso!')
+            return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
+    else:
+        form = PatientForm()
+
+    return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
+
+@login_required
+def excluir_paciente(request, paciente_id):
+
+    # Obtém o paciente a partir do ID, ou retorna 404 se não encontrado
+    paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
+
+    if request.method == 'POST':
+        # Excluir o paciente
+        paciente.delete()
+        messages.success(request, 'Paciente excluído com sucesso!')
+        return redirect('accounts:pacientes')  # Redireciona para a lista de pacientes
+
+    return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
+
+@login_required
+def medical_image(request, paciente_id):
+    # Obtém o paciente a partir do ID
+    paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
+    
+    # Obtém as imagens médicas associadas ao paciente
+    images = MedicalImage.objects.filter(patient=paciente)
+    
+    return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
+
+def excluir_paciente(request, paciente_id):
+    paciente = get_object_or_404(Patient, id=paciente_id)
+    
+    if request.method == 'POST':
+        paciente.delete()
+        messages.success(request, 'Paciente excluído com sucesso!')
+        return redirect('accounts:pacientes')
+    
+    # Se não for um POST, redireciona de volta para a página de pacientes
+    return redirect('accounts:pacientes')
