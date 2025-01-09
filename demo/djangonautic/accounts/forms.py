@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
 from .models import UserProfile
-from .models import Patient
+from .models import Patient, MedicalImage
 
 class UserEditForm(UserChangeForm):
     class Meta:
@@ -24,3 +24,7 @@ class PatientForm(forms.ModelForm):
             'number': 'Número',
         }
 
+class MedicalImageForm(forms.ModelForm):
+    class Meta:
+        model = MedicalImage
+        fields = ['image', 'description']

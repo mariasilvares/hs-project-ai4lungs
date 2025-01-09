@@ -1,4 +1,3 @@
-# models.py
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -45,12 +44,13 @@ class Patient(models.Model):
     registration_date = models.DateTimeField(auto_now_add=True)  # Data de registro
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.number})"
     
 class MedicalImage(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='medical_images/')
     description = models.TextField()
 
+
     def __str__(self):
-        return f"Image for {self.patient.name}"
+                return f"Imagem de {self.paciente.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"

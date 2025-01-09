@@ -1,25 +1,123 @@
 {% extends 'base_layout.html' %}
 
 {% block content %}
-    <h1>MedicalImages</h1>
+<div class="container" style="margin-top: 20px;">
+    <h2 class="text-center" style="margin-bottom: 20px;">Página do Paciente</h2>
     
-    <h2>Paciente: {{ paciente.name }}</h2>
-    <p><strong>Número do Paciente:</strong> {{ paciente.number }}</p>
-    <p><strong>Data de Registro:</strong> {{ paciente.registration_date|date:"d/m/Y" }}</p>
+    <!-- Informações do Paciente -->
+    <div class="patient-info" style="margin-bottom: 100px;">
+        <div class="card" style="padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <div class="card-header" style="font-weight: bold; font-size: 20px; margin-bottom: 10px;">
+                Informações do Paciente
+            </div>
+            <div class="card-body" style="line-height: 1.8;">
+                <p><strong>Nome do paciente:</strong> {{ paciente.name }}</p>
+                <p><strong>Número do paciente:</strong> {{ paciente.number }}</p>
+            </div>
+        </div>
+    </div>
 
-    <hr>
+    <!-- Upload da Radiografia -->
+    <div class="upload-section">
+        <h3 style="margin-bottom: 10px;">Upload da Radiografia</h3>
+        <p>Carregue uma radiografia de pulmão para análise. O sistema tem como objetivo analisar a imagem médica e ajudar no reconhecimento de câncer, para um diagnóstico antecipado e mais preciso.</p>
 
-    {% if images %}
-        <h3>Imagens Médicas:</h3>
-        <ul>
-            {% for image in images %}
-                <li>
-                    <img src="{{ image.image.url }}" alt="Image for {{ paciente.name }}" width="200">
-                    <p><strong>Descrição:</strong> {{ image.description }}</p>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Não há imagens médicas registradas para este paciente.</p>
-    {% endif %}
+        {% if messages %}
+            <ul class="messages" style="margin-top: 20px; padding: 0; list-style: none;">
+                
+            </ul>
+        {% endif %}
+
+        <div class="upload-container">
+            <form method="post" enctype="multipart/form-data" action="{% url 'accounts:upload_image' paciente.id %}">
+                {% csrf_token %}
+                <div class="upload-box" id="upload-box">
+                    <span id="upload-instruction">Arraste sua imagem aqui ou clique para selecionar</span>
+                    <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)">
+                    <div id="image-preview" class="image-preview">
+                        <!-- Pré-visualização será inserida aqui -->
+                    </div>
+                </div>
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<hr style="margin: 100px 0; border: 1px solid #ccc;"> <!-- Linha separadora -->
+
+    <!-- Imagens Carregadas -->
+    <div class="uploaded-images" style="margin-bottom: 60px;">
+        <h3 style="margin-bottom: 30px;">Imagens Carregadas</h3>
+        {% if images %}
+            <div class="image-gallery" style="display: flex; flex-wrap: wrap; gap: 20px;">
+                {% for image in images %}
+                    <div class="image-card" style="text-align: center; width: 150px; position: relative;">
+                        <img src="{{ image.image.url }}" alt="{{ image.description }}" class="image-thumbnail" style="width: 100%; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px;">
+                        <p>{{ image.description }}</p>
+
+                        <!-- Botão X para remover a imagem -->
+                        <span class="remove-image" onclick="removeImage('{{ image.id }}')" style="position: absolute; top: 5px; right: 5px; cursor: pointer; background-color: rgb(214, 139, 105); color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 18px;">X</span>
+                        
+                        <!-- Diagnóstico -->
+                        <div class="diagnostic">
+                            <p><strong>Diagnóstico:</strong> <span class="diagnostic-result" style="display: none; color: rgb(214, 139, 105);">Cancro</span></p>
+                            <button type="button" onclick="toggleDiagnostic(this)">Ver Diagnóstico</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Não há imagens carregadas para este paciente.</p>
+        {% endif %}
+    </div>
+
+    <hr style="margin: 40px 0; border: 1px solid #ccc;"> <!-- Linha separadora -->
+
+
+<script>
+// Função para remover a imagem e também da base de dados
+function removeImage(imageId) {
+    if (confirm("Tem certeza de que deseja remover esta imagem?")) {
+        // Enviar uma requisição AJAX para deletar a imagem
+        fetch(`/delete_image/${imageId}/`, {
+            method: 'GET', // Pode ser POST dependendo da configuração
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}', // Enviar token CSRF para proteger a requisição
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remover a imagem do frontend
+                const imageCard = document.querySelector(`#image-card-${imageId}`);
+                if (imageCard) {
+                    imageCard.remove(); // Remove o card da imagem
+                }
+            } else {
+                alert("Erro ao remover a imagem.");
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao remover a imagem:', error);
+            alert("Houve um erro ao tentar remover a imagem.");
+        });
+    }
+}
+
+// Função para exibir/ocultar o diagnóstico
+function toggleDiagnostic(button) {
+    const diagnosticResult = button.previousElementSibling.querySelector('.diagnostic-result');
+    if (diagnosticResult.style.display === "none") {
+        diagnosticResult.style.display = "inline"; // Exibe o diagnóstico
+        button.textContent = "Ocultar Diagnóstico"; // Altera o texto do botão
+    } else {
+        diagnosticResult.style.display = "none"; // Oculta o diagnóstico
+        button.textContent = "Ver Diagnóstico"; // Restaura o texto do botão
+    }
+}
+</script>
+
 {% endblock %}
+
+

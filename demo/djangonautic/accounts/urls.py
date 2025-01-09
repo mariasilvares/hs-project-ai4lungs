@@ -13,4 +13,6 @@ urlpatterns = [
     path('pacientes/', views.pacientes, name='pacientes'),
     path('paciente/excluir/<int:paciente_id>/', views.excluir_paciente, name='excluir_paciente'),
     path('paciente/medical_image/<int:paciente_id>/', views.medical_image, name='medical_image'),
+    path('upload_image/<int:paciente_id>/', views.upload_image, name='upload_image'),
+    # Outras URLs...
 ]

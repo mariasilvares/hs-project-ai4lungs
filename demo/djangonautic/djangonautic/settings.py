@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'articles',
     'accounts',
-    'xray_images',#adicionado
 ]
 
 MIDDLEWARE = [

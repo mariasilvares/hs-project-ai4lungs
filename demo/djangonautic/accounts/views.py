@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.utils.timezone import now
 from .models import Activity
 from .models import Patient, MedicalImage
-from .forms import PatientForm
+from .forms import PatientForm, MedicalImageForm
 
 
 # Create your views here.
@@ -91,22 +91,21 @@ def profile_edit(request):
     })
 
 
-def upload_image(request):
-    if request.method == 'POST' and request.FILES['image']:
-        #  processando a imagem aqui
-        image = request.FILES['image']
-        
-        # processamento de imagem
-        
-        # Sucesso ao carregar a imagem
+
+def upload_image(request, paciente_id):
+    # Recupera o paciente com o ID fornecido
+    paciente = get_object_or_404(Patient, id=paciente_id)
+
+    if request.method == 'POST' and 'image' in request.FILES:
+        uploaded_file = request.FILES['image']
+        MedicalImage.objects.create(patient=paciente, image=uploaded_file)
+
+        # Mensagem de sucesso
         messages.success(request, 'Imagem carregada com sucesso!')
-        
-        # Redireciona para uma outra página ou para o próprio upload
-        return redirect('upload_image') 
-    return render(request, 'upload_image.html')
 
-
-@login_required
+    # Obtém todas as imagens para o paciente
+    images = MedicalImage.objects.filter(patient=paciente)
+    return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
 def pacientes(request):
     # Obtém os pacientes do usuário atual
     pacientes = Patient.objects.filter(user=request.user)
@@ -143,11 +142,27 @@ def excluir_paciente(request, paciente_id):
 def medical_image(request, paciente_id):
     # Obtém o paciente a partir do ID
     paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
-    
+
     # Obtém as imagens médicas associadas ao paciente
     images = MedicalImage.objects.filter(patient=paciente)
-    
-    return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
+
+    # Verifica se o formulário de upload foi submetido
+    if request.method == 'POST' and 'image' in request.FILES:
+        form = MedicalImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Associa a imagem ao paciente
+            medical_image = form.save(commit=False)
+            medical_image.patient = paciente
+            medical_image.save()
+
+            messages.success(request, 'Imagem médica carregada com sucesso!')
+            return redirect('accounts:medical_image', paciente_id=paciente.id)
+    else:
+        form = MedicalImageForm()
+
+    return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images, 'form': form})
+
+
 
 def excluir_paciente(request, paciente_id):
     paciente = get_object_or_404(Patient, id=paciente_id)
