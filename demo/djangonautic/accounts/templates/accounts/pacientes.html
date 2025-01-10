@@ -1,52 +1,60 @@
 {% extends 'base_layout.html' %}
 
 {% block content %}
-<h1>Pacientes</h1>
+<div class="container" style="margin-top: 0px; font-family: 'Arial', sans-serif; background-color: #424040; padding: 2px 0;">
+    <h1 class="text-center" style="margin-bottom: 30px; font-size: 40px; color: #ffffff; font-weight: 700;">Gestão de Pacientes</h1>
 
-<!-- Exibe a mensagem de sucesso, se houver -->
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+    <!-- Exibe a mensagem de sucesso, se houver -->
+    {% if messages %}
+        <ul class="messages" style="max-width: 600px; margin: 20px auto; list-style: none; padding: 0; text-align: center;">
+            {% for message in messages %}
+                <li style="background-color: #485188; color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
-<!-- Formulário para adicionar pacientes -->
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Adicionar Paciente</button>
-</form>
+    <!-- Formulário para adicionar pacientes -->
+    <div class="add-patient-form" style="background-color: #615c5c; padding: 20px 30px; border-radius: 10px; max-width: 600px; margin: 0 auto 140px auto;">
+        <h2 style="color: #c4bebe; text-align: center; margin-bottom: 20px;">Adicionar Paciente</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div style="line-height: 1.8; color: #c4bebe;">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" style="margin-top: 20px; padding: 12px 30px; background-color: #485188; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+                Adicionar Paciente
+            </button>
+        </form>
+    </div>
 
-<hr>
-
-<!-- Lista de pacientes -->
-<h2>Lista de Pacientes</h2>
-<div class="patients-list-container">
-    <div class="patients-list">
+    <!-- Lista de pacientes -->
+    <h2 class="text-center" style="font-size: 30px; color: #ffffff; font-weight: 600; margin-bottom: 30px;">Lista de Pacientes</h2>
+    <div class="patients-list-container" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;margin-bottom: 300px;">
         {% for paciente in pacientes %}
-            <div class="patient-card">
+            <div class="patient-card" style="background-color: #464444; border-radius: 10px; padding: 20px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; text-align: center;">
                 <div class="patient-info">
-                    <h3>{{ paciente.name }}</h3>
-                    <p>ID: {{ paciente.number }}</p>
-                    <p>Registrado em: {{ paciente.registration_date|date:"d/m/Y" }}</p>
+                    <h3 style="color: #c4bebe; font-size: 22px; margin-bottom: 10px;">{{ paciente.name }}</h3>
+                    <p style="color: #c4bebe; margin: 5px 0;">ID: <strong>{{ paciente.number }}</strong></p>
+                    <p style="color: #c4bebe; margin: 5px 0;">Registado em: <strong>{{ paciente.registration_date|date:"d/m/Y" }}</strong></p>
                 </div>
-                <div class="patient-actions">
-                    <a href="{% url 'accounts:medical_image' paciente.id %}" class="btn view-images">Exibir Imagens Médicas</a>
+                <div class="patient-actions" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                    <a href="{% url 'accounts:medical_image' paciente.id %}" class="btn view-images" style="padding: 10px 20px; background-color: #485188; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
+                        Exibir Imagens Médicas
+                    </a>
                     
                     <!-- Formulário para excluir paciente -->
-                    <form action="{% url 'accounts:excluir_paciente' paciente.id %}" method="post" id="delete-form-{{ paciente.id }}">
+                    <form action="{% url 'accounts:excluir_paciente' paciente.id %}" method="post" id="delete-form-{{ paciente.id }}" style="display: inline;">
                         {% csrf_token %}
-                        <a href="#" onclick="document.getElementById('delete-form-{{ paciente.id }}').submit(); return confirm('Tem certeza que deseja excluir este paciente?');" class="btn delete">
+                        <a href="#" onclick="document.getElementById('delete-form-{{ paciente.id }}').submit(); return confirm('Tem certeza que deseja excluir este paciente?');" class="btn delete" style="padding: 10px 20px; background-color: #8f3b37; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
                             Excluir
                         </a>
                     </form>
                 </div>
             </div>
         {% empty %}
-            <div class="no-patients">Você ainda não adicionou nenhum paciente.</div>
+            <div class="no-patients" style="text-align: center; color: #c4bebe; font-size: 16px; margin-top: 40px;">Você ainda não adicionou nenhum paciente.</div>
         {% endfor %}
     </div>
 </div>
 {% endblock %}
+

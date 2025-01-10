@@ -5,11 +5,11 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserEditForm, UserProfileForm
 from .models import Activity
 from django.contrib import messages
-from django.utils.timezone import now
 from .models import Activity
 from .models import Patient, MedicalImage
 from .forms import PatientForm, MedicalImageForm
-
+from django.http import Http404
+from django.http import JsonResponse
 
 # Create your views here.
 def signup_view(request):
@@ -44,7 +44,6 @@ def logout_view(request):
         return redirect('home')
 
 
-@login_required
 def profile_view(request):
     return render(request, 'accounts/profile.html')
     
@@ -91,7 +90,6 @@ def profile_edit(request):
     })
 
 
-
 def upload_image(request, paciente_id):
     # Recupera o paciente com o ID fornecido
     paciente = get_object_or_404(Patient, id=paciente_id)
@@ -106,6 +104,8 @@ def upload_image(request, paciente_id):
     # Obtém todas as imagens para o paciente
     images = MedicalImage.objects.filter(patient=paciente)
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
+
+
 def pacientes(request):
     # Obtém os pacientes do usuário atual
     pacientes = Patient.objects.filter(user=request.user)
@@ -124,7 +124,7 @@ def pacientes(request):
 
     return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
 
-@login_required
+
 def excluir_paciente(request, paciente_id):
 
     # Obtém o paciente a partir do ID, ou retorna 404 se não encontrado
@@ -138,7 +138,7 @@ def excluir_paciente(request, paciente_id):
 
     return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
 
-@login_required
+
 def medical_image(request, paciente_id):
     # Obtém o paciente a partir do ID
     paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
@@ -163,14 +163,18 @@ def medical_image(request, paciente_id):
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images, 'form': form})
 
 
+def delete_image(request, image_id):
+    # Verifique se o usuário está autenticado, se necessário
+    if request.user.is_authenticated:
+        image = get_object_or_404(MedicalImage, id=image_id)
 
-def excluir_paciente(request, paciente_id):
-    paciente = get_object_or_404(Patient, id=paciente_id)
-    
-    if request.method == 'POST':
-        paciente.delete()
-        messages.success(request, 'Paciente excluído com sucesso!')
-        return redirect('accounts:pacientes')
-    
-    # Se não for um POST, redireciona de volta para a página de pacientes
-    return redirect('accounts:pacientes')
+        # Se necessário, você pode adicionar verificações de permissão, como verificar se a imagem pertence ao paciente do usuário
+
+        # Deletar a imagem
+        image.delete()
+
+        # Retornar uma resposta JSON indicando sucesso
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
+
