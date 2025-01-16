@@ -32,9 +32,9 @@ class Activity(models.Model):
 
     def get_action_display(self):
         if self.action == 'profile_update':
-            return 'Alteração de Perfil'
+            return 'Profile Change'
         elif self.action == 'image_upload':
-            return 'Upload de Imagem'
+            return 'X-Ray Uploaded'
         return self.action  # Retorna o valor original de 'action'
 
 class Patient(models.Model):
@@ -53,4 +53,4 @@ class MedicalImage(models.Model):
 
 
     def __str__(self):
-                return f"Imagem de {self.paciente.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
+                return f"Image by {self.paciente.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"

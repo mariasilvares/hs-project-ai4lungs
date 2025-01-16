@@ -1,14 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
-from .forms import UserEditForm, UserProfileForm
-from .models import Activity
+from .forms import UserEditForm, UserProfileForm,PatientForm, MedicalImageForm
+
 from django.contrib import messages
-from .models import Activity
-from .models import Patient, MedicalImage
-from .forms import PatientForm, MedicalImageForm
-from django.http import Http404
+from .models import Patient, MedicalImage, Activity
 from django.http import JsonResponse
 
 # Create your views here.
@@ -66,20 +62,20 @@ def profile_edit(request):
                     Activity.objects.create(
                         user=request.user,
                         action='image_upload',
-                        additional_info=f"Imagem carregada: {profile_form.cleaned_data['profile_picture'].name}"
+                        additional_info=f"Uploaded image: {profile_form.cleaned_data['profile_picture'].name}"
                     )
 
             # Registrar a atividade de alteração de perfil
             Activity.objects.create(
                 user=request.user,
                 action='profile_update',
-                additional_info="Alteração no perfil do usuário."
+                additional_info="Change in user profile."
             )
 
-            messages.success(request, "Perfil atualizado com sucesso.")
+            messages.success(request, "Profile updated with success!")
             return redirect('profile')  # Redireciona para o perfil após salvar
         else:
-            messages.error(request, "Ocorreu um erro ao atualizar o perfil. Verifique os campos e tente novamente.")
+            messages.error(request, "An error occurred when updating the profile. Check the fields and try again.")
     else:
         user_form = UserEditForm(instance=request.user)
         profile_form = UserProfileForm(instance=request.user.userprofile)
@@ -99,7 +95,7 @@ def upload_image(request, paciente_id):
         MedicalImage.objects.create(patient=paciente, image=uploaded_file)
 
         # Mensagem de sucesso
-        messages.success(request, 'Imagem carregada com sucesso!')
+        messages.success(request, 'Image uploaded with success!')
 
     # Obtém todas as imagens para o paciente
     images = MedicalImage.objects.filter(patient=paciente)
@@ -117,7 +113,7 @@ def pacientes(request):
             paciente = form.save(commit=False)
             paciente.user = request.user
             paciente.save()
-            messages.success(request, 'Paciente adicionado com sucesso!')
+            messages.success(request, 'Patient added with success!')
             return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
     else:
         form = PatientForm()
@@ -133,7 +129,7 @@ def excluir_paciente(request, paciente_id):
     if request.method == 'POST':
         # Excluir o paciente
         paciente.delete()
-        messages.success(request, 'Paciente excluído com sucesso!')
+        messages.success(request, 'Patient deleted with success!')
         return redirect('accounts:pacientes')  # Redireciona para a lista de pacientes
 
     return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
@@ -155,7 +151,7 @@ def medical_image(request, paciente_id):
             medical_image.patient = paciente
             medical_image.save()
 
-            messages.success(request, 'Imagem médica carregada com sucesso!')
+            messages.success(request, 'X-ray uploaded with success!')
             return redirect('accounts:medical_image', paciente_id=paciente.id)
     else:
         form = MedicalImageForm()

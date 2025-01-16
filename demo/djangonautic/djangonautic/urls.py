@@ -9,8 +9,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    re_path('articles/', include('articles.urls')), 
+    path('accounts/', include('accounts.urls')), 
     re_path(r'^$', views.homepage, name='home'),  # Home page
     re_path(r'^profile/', views.profile, name='profile'),  # Perfil do usuário
     re_path('password_change/', auth_views.PasswordChangeView.as_view(), name='change_password'),

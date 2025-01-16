@@ -3,14 +3,14 @@
 {% load static %}
 
 {% block content %}
-<div class="edit-profile-container" style="margin-top: 20px; font-family: 'Arial', sans-serif; background-color: #383737; padding: 20px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); max-width: 800px; margin-left: auto; margin-right: auto;">
-    <h2 style="text-align: center; font-size: 28px; color: #ffffff; margin-bottom: 20px;">Editar Perfil</h2>
+<div class="edit-profile-container" style="margin-top: 20px; background-color: #383737; padding: 20px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); max-width: 800px; margin-left: auto; margin-right: auto;">
+    <h2 style="text-align: center; font-size: 28px; color: #ffffff; margin-bottom: 20px;">Edit profile</h2>
 
     <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
         {% csrf_token %}
         
         <div>
-            <label for="id_username" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Nome de Usuário:</label>
+            <label for="id_username" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Username:</label>
             {{ user_form.username }}
         </div>
 
@@ -20,7 +20,7 @@
         </div>
 
         <div>
-            <label for="id_profile_picture" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Foto de Perfil:</label>
+            <label for="id_profile_picture" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Profile picture:</label>
             <div style="margin-bottom: 10px;">
                 {% if user.userprofile.profile_picture %}
                     <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de Perfil" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
@@ -44,13 +44,13 @@
         {% endif %}
 
         <button type="submit" style="padding: 12px 30px; background-color: #485188; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
-            Salvar Alterações
+            Save Changes
         </button>
     </form>
 
     <div style="text-align: center; margin-top: 20px;">
         <a href="{% url 'profile' %}" style="padding: 10px 20px; background-color: #8f3b37; color: white; text-decoration: none; border-radius: 20px; font-size: 14px; transition: background-color 0.3s ease;">
-            Voltar ao Perfil
+            Back to Profile Page
         </a>
     </div>
 </div>

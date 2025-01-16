@@ -2,36 +2,36 @@
 
 {% block content %}
 <div class="container" style="margin-top: 20px; font-family: 'Arial', sans-serif; background-color: #615c5c; padding: 2px 0;">
-    <h1 class="text-center" style="margin-bottom: 30px; font-size: 40px; color: #ffffff; font-weight: 700;">Página do Paciente</h1>
+    <h1 class="text-center" style="margin-bottom: 30px; font-size: 40px; color: #ffffff;">Individual Patient page</h1>
     
     <!-- Informações do Paciente -->
     <div class="patient-info" style="margin-bottom: 40px;">
         <div class="card" style="padding: 20px 30px; border-radius: 10px; background-color: #464444; max-width: 600px; margin: 0 auto;">
             <div class="card-header" style="font-size: 22px; font-weight: 600; margin-bottom: 15px; color: #c4bebe;">
-                Informações
+                Informations
             </div>
             <div class="card-body" style="line-height: 1.7; font-size: 16px;">
-                <p><strong style="color: #c4bebe;">Nome do paciente:</strong> <span style="color: #c4bebe;">{{ paciente.name }}</span></p>
-                <p><strong style="color: #c4bebe;">Número do paciente:</strong> <span style="color: #c4bebe;">{{ paciente.number }}</span></p>
+                <p><strong style="color: #c4bebe;">Patient name:</strong> <span style="color: #c4bebe;">{{ paciente.name }}</span></p>
+                <p><strong style="color: #c4bebe;">Patient number:</strong> <span style="color: #c4bebe;">{{ paciente.number }}</span></p>
             </div>
         </div>
     </div>
 
     <!-- Upload da Radiografia -->
     <div class="upload-section" style="margin-bottom: 50px; text-align: center;">
-        <h3 style="font-size: 22px; color: #333; font-weight: 600;">Upload da Radiografia</h3>
-        <p style="font-size: 16px; color: #c4bebe; margin-bottom: 30px; max-width: 500px; margin: 0 auto;">Carregue uma radiografia para análise. O sistema usa IA para detetar possíveis sinais de cancro, auxiliando no diagnóstico.</p>
+        <h3 style="font-size: 22px; color: #333; font-weight: 600;">Upload X-ray</h3>
+        <p style="font-size: 16px; color: #c4bebe; margin-bottom: 30px; max-width: 500px; margin: 0 auto;">Upload an X-ray for analysis. The system uses AI to detect possible signs of cancer, helping with the diagnosis.</p>
 
         <div class="upload-container" style="background-color: #464444; border-radius: 10px; padding: 30px; width: 100%; max-width: 450px; margin: 0 auto;">
             <form method="post" enctype="multipart/form-data" action="{% url 'accounts:upload_image' paciente.id %}">
                 {% csrf_token %}
                 <div class="upload-box" id="upload-box" style="border: 2px dashed #485188; padding: 20px; text-align: center; position: relative; border-radius: 10px; background-color: #ebe5e5; cursor: pointer;">
-                    <span id="upload-instruction" style="font-size: 14px; color: #485188;">Arraste a sua imagem para aqui ou clique para selecionar</span>
+                    <span id="upload-instruction" style="font-size: 14px; color: #485188;">Drag your x-ray here or click to select</span>
                     <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; cursor: pointer;">
                     <div id="image-preview" class="image-preview" style="margin-top: 20px;"></div>
                 </div>
                 <button type="submit" style="margin-top: 25px; padding: 12px 30px; background-color: #485188; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
-                    Enviar
+                    Send
                 </button>
             </form>
         </div>
@@ -41,7 +41,7 @@
 
     <!-- Imagens Carregadas -->
     <div class="upload-section" style="margin-bottom: 200px; text-align: center;">
-        <h3 style="font-size: 22px; color: #333; font-weight: 600;">Imagens Carregadas</h3>
+        <h3 style="font-size: 22px; color: #333; font-weight: 600;">Uploaded X-rays</h3>
         {% if images %}
             <div class="image-gallery" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
                 {% for image in images %}
@@ -56,16 +56,16 @@
 
                         <!-- Diagnóstico -->
                         <div class="diagnostic" style="padding: 10px 15px; background-color: #464444; border-top: 1px solid #464444; border-radius: 0 0 10px 10px;">
-                            <p style="font-size: 14px; color: #c4bebe;"><strong>Diagnóstico:</strong> <span class="diagnostic-result" style="display: none; color: #8f3b37;">Cancro</span></p>
+                            <p style="font-size: 14px; color: #c4bebe;"><strong>Diagnosis:</strong> <span class="diagnostic-result" style="display: none; color: #8f3b37;font-weight: 700;">Cancer</span></p>
                             <button type="button" onclick="toggleDiagnostic(this)" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;">
-                                Ver Diagnóstico
+                                See Diagnosis
                             </button>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p style="font-size: 16px; color: #c4bebe; text-align: center;">Não há imagens carregadas para este paciente.</p>
+            <p style="font-size: 16px; color: #c4bebe; text-align: center;">No images uploaded for this patient</p>
         {% endif %}
     </div>
 
@@ -74,7 +74,7 @@
     
 // Função para remover a imagem e também da base de dados
 function removeImage(imageId) {
-    if (confirm("Tem certeza de que deseja remover esta imagem?")) {
+    if (confirm("Are you sure you want to remove this x-ray?")) {
         fetch(`/accounts/delete_image/${imageId}/`, {
             method: 'GET',
             headers: {
@@ -89,12 +89,12 @@ function removeImage(imageId) {
                     imageCard.remove();
                 }
             } else {
-                alert("Erro ao remover a imagem.");
+                alert("Error removing the x-ray");
             }
         })
         .catch(error => {
-            console.error('Erro ao remover a imagem:', error);
-            alert("Houve um erro ao tentar remover a imagem.");
+            console.error('Error removing the x-ray', error);
+            alert("There was an error trying to remove the x-ray");
         });
     }
 }
@@ -104,10 +104,10 @@ function toggleDiagnostic(button) {
     const diagnosticResult = button.previousElementSibling.querySelector('.diagnostic-result');
     if (diagnosticResult.style.display === "none") {
         diagnosticResult.style.display = "inline";
-        button.textContent = "Ocultar Diagnóstico";
+        button.textContent = "Hide Diagnosis";
     } else {
         diagnosticResult.style.display = "none";
-        button.textContent = "Ver Diagnóstico";
+        button.textContent = "See Diagnosis";
     }
 }
 </script>

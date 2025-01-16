@@ -10,22 +10,22 @@
 <div class='wrapper'>
     <!-- base_layout.html -->
 <header>
-    <h1><a href="{% url 'home' %}">AI4Lungs</a></h1>
+    <h1><a href="{% url 'home' %}" style="font-weight: 700;">AI4Lungs</a></h1>
     <nav>
         <ul>
-            <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+            <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="font-weight: 700;">Home</a></li>
             {% if user.is_authenticated %}
-                <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">Perfil</a></li>
-                <li><a href="{% url 'accounts:pacientes' %}" class="{% if request.path == '/accounts/pacientes/' %}active{% endif %}">Pacientes</a></li>
+                <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}" style="font-weight: 700;">Profile</a></li>
+                <li><a href="{% url 'accounts:pacientes' %}" class="{% if request.path == '/accounts/pacientes/' %}active{% endif %}" style="font-weight: 700;">Patients</a></li>
                 <li>
                     <form class="logout-link" action="{% url 'accounts:logout' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="{% if request.path == '/accounts/logout/' %}active{% endif %}">Logout</button>
+                        <button type="submit" class="{% if request.path == '/accounts/logout/' %}active{% endif %}" style="font-weight: 700;">Logout</button>
                     </form>
                 </li>
             {% else %}
-                <li><a href='{% url "accounts:login" %}' class="{% if request.path == '/accounts/login/' %}active{% endif %}">Login</a></li>
-                <li><a href='{% url "accounts:signup" %}' class="{% if request.path == '/accounts/signup/' %}active{% endif %}">Signup</a></li>
+                <li><a href='{% url "accounts:login" %}' class="{% if request.path == '/accounts/login/' %}active{% endif %}" style="font-weight: 700;">Login</a></li>
+                <li><a href='{% url "accounts:signup" %}' class="{% if request.path == '/accounts/signup/' %}active{% endif %}" style="font-weight: 700;">Signup</a></li>
             {% endif %}
         </ul>
     </nav>
@@ -44,12 +44,12 @@
 <!-- Modal de confirmação de logout -->
 <div class="modal" id="logoutModal">
     <div class="modal-content">
-        <h2>Tem a certeza que deseja sair?</h2>
+        <h2>Are you sure you want to log out from AI4LUNGS?</h2>
         <form action="{% url 'accounts:logout' %}" method="post">
             {% csrf_token %}
-            <button type="submit" id="confirm-logout">Sim, sair</button>
+            <button type="submit" id="confirm-logout">Yes, Logout</button>
         </form>
-        <button id="cancel-logout">Cancelar</button>
+        <button id="cancel-logout">Cancel</button>
     </div>
 </div>
 

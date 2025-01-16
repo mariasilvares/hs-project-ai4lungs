@@ -3,30 +3,30 @@
 {% load static %}
 
 {% block content %}
-<div class="profile-container" style="margin-top: 20px; font-family: 'Arial', sans-serif; background-color: #424040; padding: 20px;">
+<div class="profile-container" style="margin-top: 20px; background-color: #424040; padding: 20px;">
     <!-- Cabeçalho do Perfil -->
     <div class="profile-header" style="display: flex; align-items: center; margin-bottom: 20px;">
         <div class="profile-picture" style="flex-shrink: 0; margin-right: 20px;">
             {% if user.userprofile.profile_picture %}
-                <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de perfil" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
+                <img src="{{ user.userprofile.profile_picture.url }}" alt="Profile Picture" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
             {% else %}
-                <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
+                <img src="{% static 'default-profile.png' %}" alt="Default image" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
             {% endif %}
         </div>
         <div class="profile-info" style="color: #c4bebe;">
             <h2 style="font-size: 28px; margin-bottom: 10px; color: #ffffff;">{{ user.username }}</h2>
             <p style="margin: 5px 0;">Email: <strong>{{ user.email }}</strong></p>
-            <p style="margin: 5px 0;">Membro desde: <strong>{{ user.date_joined|date:"F j, Y" }}</strong></p>
+            <p style="margin: 5px 0;">Member since: <strong>{{ user.date_joined|date:"F j, Y" }}</strong></p>
         </div>
     </div>
 
     <!-- Ações do Perfil -->
     <div class="profile-actions" style="display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 30px;">
         <a href="{% url 'accounts:profile_edit' %}" class="btn" style="padding: 10px 20px; background-color: #485188; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
-            Editar Perfil
+            Edit profile
         </a>
         <a href="{% url 'change_password' %}" class="btn" style="padding: 10px 20px; background-color: #485188; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
-            Alterar Senha
+            Change Password
         </a>
         <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0;">
             {% csrf_token %}
@@ -38,12 +38,12 @@
 
     <!-- Histórico de Atividades -->
     <div class="activity-history" style="background-color: #424040; padding: 50px;">
-        <h3 style="color: #ffffff; font-size: 22px; margin-bottom: 20px; text-align: center;">Atividades Recentes</h3>
+        <h3 style="color: #ffffff; font-size: 22px; margin-bottom: 20px; text-align: center;">Recent Activities</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
             {% for activity in user.activity_set.all|slice:":5" %}
                 <li style="color: #c4bebe; padding: 10px 0; border-bottom: 1px solid #555555;">{{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}</li>
             {% empty %}
-                <li style="color: #c4bebe; text-align: center;">Nenhuma atividade recente.</li>
+                <li style="color: #c4bebe; text-align: center;">No recent activity</li>
             {% endfor %}
         </ul>
     </div>

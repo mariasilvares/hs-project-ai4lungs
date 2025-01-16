@@ -53,61 +53,6 @@ nav button{
     font-size: 1em;
 }
 
-body{
-    background-color: #424040;
-    /* background-image: url(pulmão.png);
-    background-repeat: repeat no-repeat; */
-    color: #fff;
-}
-
-body{
-    font-family: Ubuntu;
-}
-
-h1, h2, h3, h4, h5 {
-    font-weight: normal;
-    margin: 0;
-}
-
-a, a:hover, a:visited {
-    color: #fff;
-    text-decoration: none;
-}
-
-.wrapper{
-    max-width: 960px;
-    margin: 0 auto;
-}
-
-div.wrapper h1{
-    text-align: center;
-    margin: 100px auto;
-    font-size: 2.4em;
-}
-
-header{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 20px 0;
-}
-
-nav{
-    justify-self: end;
-}
-
-nav li{
-    display: inline-block;
-    margin-left: 20px;
-}
-
-nav button{
-    background: none;
-    color: #fff;
-    cursor: pointer;
-    border: 0;
-    font-size: 1em;
-}
-
 
 .site-form{
     margin-top: 60px;
@@ -182,46 +127,10 @@ a.highlight{
 
 /* Estilo para links ativos */
 a.active {
-    color: rgb(72, 81, 136); /* texto vermelho */
+    color: rgb(103, 111, 158); /* texto vermelho */
     font-weight: bold; /* texto em negrito para destaque */
 }
 
-
-/* Estilos para o modal */
-.modal {
-    display: none;  /* Inicialmente escondido */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);  /* Fundo semitransparente */
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    text-align: center;
-    width: 300px;
-}
-
-.modal-content h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.modal-content button {
-    padding: 10px;
-    margin: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-}
 
 #confirm-logout {
     background-color:rgb(72, 81, 136);
@@ -235,31 +144,6 @@ a.active {
 
 #confirm-logout:hover, #cancel-logout:hover {
     opacity: 0.8;
-}
-
-
-.messages-container {
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.message {
-    padding: 5px;
-    margin-bottom: 5px;
-    list-style: none;
-}
-
-.message.success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.message.error {
-    background-color: #f8d7da;
-    color: #721c24;
 }
 
 .profile-edit-container {
@@ -315,44 +199,6 @@ a.active {
 
 .back-link a:hover {
     text-decoration: underline;
-}
-
-/* Mensagens de sucesso ou erro */
-.messages-container {
-    margin: 20px auto;
-    padding: 10px;
-    width: 80%;
-    max-width: 600px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.messages-container ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.messages-container .message {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 3px;
-}
-
-.messages-container .message.success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.messages-container .message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.messages-container .message.warning {
-    background-color: #fff3cd;
-    color: #856404;
 }
 
 .patients-list-container {
