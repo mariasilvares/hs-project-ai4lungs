@@ -4,6 +4,29 @@
 
 {% block content %}
 <div class="profile-container" style="margin-top: 20px; background-color: #424040; padding: 20px;">
+
+    <!-- Exibe a mensagem de sucesso, se houver -->
+{% if messages %}
+<ul class="messages" style="max-width: 600px; margin: 20px auto; list-style: none; padding: 0; text-align: center;">
+    {% for message in messages %}
+        <li class="message-item" style="background-color: #485188; color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">
+            {{ message }}
+        </li>
+    {% endfor %}
+</ul>
+<script>
+    // Definir o tempo de exibição da mensagem (em milissegundos)
+    setTimeout(function() {
+        // Selecionar as mensagens e escondê-las
+        const messageItems = document.querySelectorAll('.message-item');
+        messageItems.forEach(function(item) {
+            item.style.display = 'none';
+        });
+    }, 5000); // 5000ms = 5 segundos
+</script>
+{% endif %}
+
+
     <!-- Cabeçalho do Perfil -->
     <div class="profile-header" style="display: flex; align-items: center; margin-bottom: 20px;">
         <div class="profile-picture" style="flex-shrink: 0; margin-right: 20px;">
@@ -40,8 +63,10 @@
     <div class="activity-history" style="background-color: #424040; padding: 50px;">
         <h3 style="color: #ffffff; font-size: 22px; margin-bottom: 20px; text-align: center;">Recent Activities</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
-            {% for activity in user.activity_set.all|slice:":5" %}
-                <li style="color: #c4bebe; padding: 10px 0; border-bottom: 1px solid #555555;">{{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}</li>
+            {% for activity in recent_activities %}
+                <li style="color: #c4bebe; padding: 10px 0; border-bottom: 1px solid #555555;">
+                    {{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}
+                </li>
             {% empty %}
                 <li style="color: #c4bebe; text-align: center;">No recent activity</li>
             {% endfor %}

@@ -31,17 +31,7 @@
     </nav>
 </header>
 
-<!-- Exibir mensagens de sucesso ou erro -->
-{% if messages %}
-    <div class="messages-container">
-        <ul>
-            {% for message in messages %}
-                <li class="message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-{% endif %}
-<!-- Modal de confirmação de logout -->
+<!-- caixa de confirmação de logout -->
 <div class="modal" id="logoutModal">
     <div class="modal-content">
         <h2>Are you sure you want to log out from AI4LUNGS?</h2>

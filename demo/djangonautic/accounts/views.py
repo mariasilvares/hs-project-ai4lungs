@@ -172,5 +172,3 @@ def delete_image(request, image_id):
         # Retornar uma resposta JSON indicando sucesso
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
-
-
