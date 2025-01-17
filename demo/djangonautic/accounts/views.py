@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from .forms import UserEditForm, UserProfileForm,PatientForm, MedicalImageForm
-
 from django.contrib import messages
-from .models import Patient, MedicalImage, Activity
+from .models import Patient, MedicalImage, Activity, PatientInfo
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 def signup_view(request):
@@ -52,19 +52,7 @@ def profile_edit(request):
         if user_form.is_valid() and profile_form.is_valid():
             # Salva o formulário de usuário
             user_form.save()
-
-            # Verifica se o perfil foi alterado (imagem do perfil)
-            if profile_form.has_changed():  # Verifica se houve mudanças no perfil
-                profile_form.save()
-
-                # Registrar atividade de upload de imagem, se houver
-                if 'profile_picture' in profile_form.cleaned_data and profile_form.cleaned_data['profile_picture']:
-                    Activity.objects.create(
-                        user=request.user,
-                        action='image_upload',
-                        additional_info=f"Uploaded image: {profile_form.cleaned_data['profile_picture'].name}"
-                    )
-
+            
             # Registrar a atividade de alteração de perfil
             Activity.objects.create(
                 user=request.user,
@@ -93,6 +81,12 @@ def upload_image(request, paciente_id):
     if request.method == 'POST' and 'image' in request.FILES:
         uploaded_file = request.FILES['image']
         MedicalImage.objects.create(patient=paciente, image=uploaded_file)
+
+        # Registrar a atividade de upload
+        activity = Activity.objects.create(
+            user=request.user,
+            action=f"Upload of {paciente.name}`s X-Ray",
+        )
 
         # Mensagem de sucesso
         messages.success(request, 'Image uploaded with success!')
@@ -159,16 +153,40 @@ def medical_image(request, paciente_id):
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images, 'form': form})
 
 
+def add_patient_info(request, paciente_id):
+    paciente = Patient.objects.get(id=paciente_id)
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+
+        # Cria e salva as informações adicionais
+        PatientInfo.objects.create(patient=paciente, title=title, description=description)
+        
+        # Redireciona para a página de detalhes do paciente
+        return redirect('accounts:medical_images', paciente_id=paciente.id)
+    
+    return render(request, 'accounts/add_patient_info.html', {'paciente': paciente})
+
+
+@csrf_exempt
 def delete_image(request, image_id):
-    # Verifique se o usuário está autenticado, se necessário
-    if request.user.is_authenticated:
-        image = get_object_or_404(MedicalImage, id=image_id)
+    if request.method == 'DELETE':
+        try:
+            image = MedicalImage.objects.get(id=image_id)
+            image.delete()
+            return JsonResponse({'message': 'Image deleted successfully.'}, status=200)
+        except MedicalImage.DoesNotExist:
+            return JsonResponse({'error': 'Image not found.'}, status=404)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-        # Se necessário, você pode adicionar verificações de permissão, como verificar se a imagem pertence ao paciente do usuário
-
-        # Deletar a imagem
-        image.delete()
-
-        # Retornar uma resposta JSON indicando sucesso
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False}, status=400)
+@csrf_exempt
+def delete_patient_info(request, info_id):
+    if request.method == 'DELETE':
+        try:
+            info = PatientInfo.objects.get(id=info_id)
+            info.delete()
+            return JsonResponse({'message': 'Information deleted successfully.'}, status=200)
+        except PatientInfo.DoesNotExist:
+            return JsonResponse({'error': 'Information not found.'}, status=404)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)

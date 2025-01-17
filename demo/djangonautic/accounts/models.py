@@ -54,3 +54,9 @@ class MedicalImage(models.Model):
 
     def __str__(self):
                 return f"Image by {self.paciente.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
+    
+class PatientInfo(models.Model):
+    patient = models.ForeignKey(Patient, related_name="patientinfo_set", on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    # Outros campos relacionados à informação...

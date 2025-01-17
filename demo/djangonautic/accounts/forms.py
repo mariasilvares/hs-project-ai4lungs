@@ -8,7 +8,7 @@ from .models import Patient, MedicalImage
 class UserEditForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ['username', 'email']  # Campos que você quer que o usuário possa editar
+        fields = ['username', 'email']  # Campos para o usuário editar
 
 class UserProfileForm(forms.ModelForm):
     class Meta:

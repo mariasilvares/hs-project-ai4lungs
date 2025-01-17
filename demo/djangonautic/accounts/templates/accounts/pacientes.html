@@ -64,7 +64,7 @@
     <!-- Modal de confirmação de exclusão -->
     <div id="deletePatientModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h2>Are you sure you want to delete this patient?</h2>
+            <h2 style="color: rgb(0, 0, 0);">Are you sure you want to delete this patient?</h2>
             <form id="deleteForm" method="post">
                 {% csrf_token %}
                 <button type="submit" id="confirm-delete" style="padding: 10px 20px; background-color: #485188; color: white; border: none; border-radius: 20px; font-size: 14px; cursor: pointer;">

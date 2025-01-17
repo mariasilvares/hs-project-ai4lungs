@@ -4,44 +4,41 @@
 <head>
     <meta charset='utf-8'>
     <title>AI4Lungs</title>
-    <link rel="stylesheet" href= "{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
 <div class='wrapper'>
     <!-- base_layout.html -->
-<header>
-    <h1><a href="{% url 'home' %}" style="font-weight: 700;">AI4Lungs</a></h1>
-    <nav>
-        <ul>
-            <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="font-weight: 700;">Home</a></li>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}" style="font-weight: 700;">Profile</a></li>
-                <li><a href="{% url 'accounts:pacientes' %}" class="{% if request.path == '/accounts/pacientes/' %}active{% endif %}" style="font-weight: 700;">Patients</a></li>
-                <li>
-                    <form class="logout-link" action="{% url 'accounts:logout' %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="{% if request.path == '/accounts/logout/' %}active{% endif %}" style="font-weight: 700;">Logout</button>
-                    </form>
-                </li>
-            {% else %}
-                <li><a href='{% url "accounts:login" %}' class="{% if request.path == '/accounts/login/' %}active{% endif %}" style="font-weight: 700;">Login</a></li>
-                <li><a href='{% url "accounts:signup" %}' class="{% if request.path == '/accounts/signup/' %}active{% endif %}" style="font-weight: 700;">Signup</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-</header>
+    <header>
+        <h1><a href="{% url 'home' %}" style="font-weight: 700;">AI4Lungs</a></h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="font-weight: 700;">Home</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}" style="font-weight: 700;">Profile</a></li>
+                    <li><a href="{% url 'accounts:pacientes' %}" class="{% if request.path == '/accounts/pacientes/' %}active{% endif %}" style="font-weight: 700;">Patients</a></li>
+                    <li>
+                        <button class="logout-button" style="font-weight: 700;">Logout</button>
+                    </li>
+                {% else %}
+                    <li><a href='{% url "accounts:login" %}' class="{% if request.path == '/accounts/login/' %}active{% endif %}" style="font-weight: 700;">Login</a></li>
+                    <li><a href='{% url "accounts:signup" %}' class="{% if request.path == '/accounts/signup/' %}active{% endif %}" style="font-weight: 700;">Signup</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
 
-<!-- caixa de confirmação de logout -->
-<div class="modal" id="logoutModal">
-    <div class="modal-content">
-        <h2>Are you sure you want to log out from AI4LUNGS?</h2>
-        <form action="{% url 'accounts:logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" id="confirm-logout">Yes, Logout</button>
-        </form>
-        <button id="cancel-logout">Cancel</button>
+    <!-- Modal de confirmação de logout -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: rgb(0, 0, 0);" >Are you sure you want to log out from AI4LUNGS?</h2>
+            <form action="{% url 'accounts:logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" id="confirm-logout">Yes, Logout</button>
+            </form>
+            <button id="cancel-logout">Cancel</button>
+        </div>
     </div>
-</div>
 
     {% block content %}
     {% endblock %}
@@ -49,13 +46,12 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        var logoutButton = document.querySelector('.logout-link button');
-        var modal = document.getElementById('logoutModal');
-        var cancelButton = document.getElementById('cancel-logout');
+        const logoutButton = document.querySelector('.logout-button');
+        const modal = document.getElementById('logoutModal');
+        const cancelButton = document.getElementById('cancel-logout');
 
         // Exibir o modal quando o botão de logout for clicado
-        logoutButton.addEventListener('click', function (event) {
-            event.preventDefault();  // Previne o envio do formulário diretamente
+        logoutButton.addEventListener('click', function () {
             modal.style.display = 'flex';  // Exibe o modal
         });
 
@@ -65,5 +61,48 @@
         });
     });
 </script>
+<style>
+    /* Estilo para o modal */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none; /* Modal invisível por padrão */
+        align-items: center; /* Centraliza verticalmente */
+        justify-content: center; /* Centraliza horizontalmente */
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+    }
+
+    .modal-content button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    #confirm-logout {
+        background-color: #485188;
+        color: white;
+    }
+
+    #cancel-logout {
+        background-color: #9b9797;
+        color: white;
+    }
+</style>
 </body>
 </html>
