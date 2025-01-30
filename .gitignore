@@ -144,4 +144,6 @@ dmypy.json
 # Data
 OpenCVXray
 ChestXRayAbnormalities
+DatasetOpenCVXray
+PulmonaryChestXRaAbnormalities
 results

@@ -35,7 +35,7 @@ class OpenCVXray(Dataset):
 
         # Initialise variables
         
-        split_folder = os.path.join(base_data_path, split) # Caminho completo para a pasta do conjunto de dados (train, val, test)
+        split_folder = os.path.join(base_data_path, 'Dataset', split) # Caminho completo para a pasta do conjunto de dados (train, val, test)
         # print(split_folder)
         # print(os.path.exists(split_folder))
 
@@ -188,8 +188,7 @@ class ChestXRayAbnormalities(Dataset):
         # Perform train, val and test split
         images_total = len(images_paths)
         labels_total = len(images_labels) 
-        
-
+            
         # dividir treino e (validação + teste):
         train_images_paths, test_val_images_paths, train_labels_paths, test_val_labels_paths = train_test_split(images_paths, images_labels, test_size=0.3, random_state=42, stratify=images_labels)
         # dividir validação e teste:
@@ -280,8 +279,7 @@ if __name__ == "__main__":
     CHECK_OpenCVXray = False
 
 
-    base_data_path = "/home/mariareissilvares/Documents/hs-project-ai4lungs/data/ChestXRayAbnormalities"
-
+    base_data_path = "/home/mariareissilvares/Documents/hs-project-ai4lungs/data/PulmonaryChestXRaAbnormalities"
     subsets = ["Montgomery/MontgomerySet", "ChinaSet_AllFiles/ChinaSet_AllFiles"]
     for subset in subsets:
         subset_path = os.path.join(base_data_path, subset)
@@ -300,7 +298,7 @@ if __name__ == "__main__":
 
     # Testar o split de treino, validação e teste
     if __name__ == "__main__":
-        base_data_path = "/home/mariareissilvares/Documents/hs-project-ai4lungs/data/ChestXRayAbnormalities"
+        base_data_path = "/home/mariareissilvares/Documents/hs-project-ai4lungs/data/PulmonaryChestXRaAbnormalities"
 
 
         # Subsets a serem testados
@@ -368,7 +366,7 @@ if __name__ == "__main__":
     if CHECK_OpenCVXray:
         # train
         d = OpenCVXray(
-            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/OpenCVXray",
+            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray",
             split="train"   
         )
 
@@ -383,7 +381,7 @@ if __name__ == "__main__":
 
         # val
         v = OpenCVXray(
-            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/OpenCVXray",
+            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray",
             split="val"
         )   
 
@@ -398,7 +396,7 @@ if __name__ == "__main__":
 
         # test
         t = OpenCVXray(
-            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/OpenCVXray",
+            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray",
             split="test"   
         )
 
@@ -422,7 +420,7 @@ if __name__ == "__main__":
         
         for split in ["train","val","test"]:
             dataset = OpenCVXray(
-            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/OpenCVXray",
+            base_data_path="/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray",
             split= split
             )
             print(f"{split.capitalize()}size:", len(dataset))  
