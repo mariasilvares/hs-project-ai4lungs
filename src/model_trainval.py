@@ -13,6 +13,9 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
+# W&B Imports
+import wandb
+
 # Project Imports
 from model_utilities import OpenCVXRayNN, ChestXRayNN
 from dataset_utilities import OpenCVXray, ChestXRayAbnormalities
@@ -49,20 +52,47 @@ if __name__ == "__main__":
     parser.add_argument('--gpu_id', type=int, default=0, help="The ID of the GPU we will use to run the program.")
     parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility (default: 42).')
     parser.add_argument('--results_dir', type=str, required=True, help='The path to the results directory.')
-    parser.add_argument('--weights_dir', type=str, help='Directory for saving model weights.')  # Argumento adicionado
-    parser.add_argument('--history_dir', type=str, help='Directory for saving training history.')  # Argumento adicionado   
+    parser.add_argument('--weights_dir', type=str, help='Directory for saving model weights.')  
+    parser.add_argument('--history_dir', type=str, help='Directory for saving training history.')  
     parser.add_argument("--data_augmentation", type=bool, default=False, help="Enable or disable data augmentation")
-    parser.add_argument('--model_name', type=str, choices=['OpenCVXRayNN', 'ChestXRayNN'], required=True, help='Name of the model to be used') # Argumento adicionado
-    parser.add_argument('--dataset_name', type=str, required=True, help='The dataset for the experiments.')  # Argumento adicionado
-    parser.add_argument('--channels', type=int, default=3, help="Número de canais da imagem.")  # Argumento adicionado
-    parser.add_argument('--height', type=int, default=64, help="Altura da imagem de entrada.")  # Argumento adicionado
-    parser.add_argument('--width', type=int, default=64, help="Largura da imagem de entrada.")  # Argumento adicionado
-    parser.add_argument('--nr_classes', type=int, default=3, help="Número de classes no modelo.")  # Argumento adicionado
-    parser.add_argument('--epochs', type=int, default=1, help="Número de épocas para o treinamento.")  # Argumento adicionado
-    parser.add_argument('--batch_size', type=int, default=32, help="Tamanho do lote para o treinamento.")  # Argumento adicionado
-    parser.add_argument('--base_data_path', type=str, required=True, help="Caminho base dos dados para treino e validação.")  # Argumento adicionado
+    parser.add_argument('--model_name', type=str, choices=['OpenCVXRayNN', 'ChestXRayNN'], required=True, help='Name of the model to be used') 
+    parser.add_argument('--dataset_name', type=str, required=True, help='The dataset for the experiments.')  
+    parser.add_argument('--channels', type=int, default=3, help="Número de canais da imagem.")  
+    parser.add_argument('--height', type=int, default=64, help="Altura da imagem de entrada.") 
+    parser.add_argument('--width', type=int, default=64, help="Largura da imagem de entrada.") 
+    parser.add_argument('--nr_classes', type=int, default=3, help="Número de classes no modelo.")  
+    parser.add_argument('--epochs', type=int, default=1, help="Número de épocas para o treinamento.") 
+    parser.add_argument('--batch_size', type=int, default=32, help="Tamanho do lote para o treinamento.")
+    parser.add_argument('--base_data_path', type=str, required=True, help="Caminho base dos dados para treino e validação.") 
 
     args = parser.parse_args()
+
+
+
+    # Start a new wandb run to track this script
+    wandb.init(
+        project="hs-projec-ai4lungs",
+        
+        config={
+            "gpu_id":args.gpu_id,
+            "seed": args.seed,
+            "results_dir": args.results_dir,
+            "weights_dir": args.weights_dir,
+            "history_dir": args.history_dir,
+            "data_augmentation": args.data_augmentation,
+            "model_name": args.model_name,
+            "dataset_name": args.dataset_name,
+            "channels": args.channels,
+            "height": args.height,
+            "width": args.width,
+            "nr_classes": args.nr_classes,
+            "epochs": args.epochs,
+            "batch_size": args.batch_size,
+            "base_data_path": args.base_data_path
+        }
+    )
+
+
 
     # Set seeds (for reproducibility reasons)
     set_seed(seed=args.seed)
@@ -102,28 +132,23 @@ if __name__ == "__main__":
         raise ValueError(f"Modelo {model_name} não reconhecido!")
 
 
+
     # Results and Weights
-    # Use the results directory specified by the user
     weights_dir = args.weights_dir if args.weights_dir else os.path.join(args.results_dir, dataset_name, "weights")
     if not os.path.isdir(weights_dir):
         os.makedirs(weights_dir)
 
     # History Files
-    # Use the results directory specified by the user
     history_dir = args.history_dir if args.history_dir else os.path.join(args.results_dir, dataset_name, "history")
     if not os.path.isdir(history_dir):
         os.makedirs(history_dir)
 
-
     # Choose GPU
     DEVICE = f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu"
-
-
 
     # Mean and STD to Normalize
     MEAN = [0.485, 0.456, 0.406]
     STD = [0.229, 0.224, 0.225]
-
 
     # Check if BCEWithLogitsLoss applies to 3 classes
     LOSS = torch.nn.CrossEntropyLoss()
@@ -131,7 +156,6 @@ if __name__ == "__main__":
 
     # You should pass a model to the optimizer
     OPTIMISER = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-
 
     # Transforms, in case we do data augmentation
     if DATA_AUGMENTATION:
@@ -199,8 +223,6 @@ if __name__ == "__main__":
     train_loader = DataLoader(dataset=train_set, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(dataset=val_set, batch_size=BATCH_SIZE, shuffle=False)
 
-
-
     # Train model and save best weights on validation set
     # Initialise min_train and min_val loss trackers
     min_train_loss = np.inf
@@ -214,7 +236,6 @@ if __name__ == "__main__":
     train_metrics = np.zeros((EPOCHS, 4))
     val_metrics = np.zeros_like(train_metrics)
 
-
     # Go through the number of Epochs
     for epoch in range(EPOCHS):
         # Epoch 
@@ -227,14 +248,11 @@ if __name__ == "__main__":
         y_train_true = list()
         y_train_pred = list()
 
-
         # Running train loss
         run_train_loss = 0.0
 
-
         # Put model in training mode
         model.train()
-
 
         # Iterate through dataloader
         for batch_idx, (images, labels) in enumerate(tqdm(train_loader)):
@@ -243,11 +261,9 @@ if __name__ == "__main__":
             images, labels = images.to(DEVICE), labels.to(DEVICE)
             model = model.to(DEVICE)
 
-
             # Find the loss and update the model parameters accordingly
             # Clear the gradients of all optimized variables
             OPTIMISER.zero_grad()
-
 
             # Forward pass: compute predicted outputs by passing inputs to the model
             logits = model(images)
@@ -275,9 +291,6 @@ if __name__ == "__main__":
             s_logits = torch.argmax(s_logits, dim=1)
             y_train_pred += list(s_logits.cpu().detach().numpy())
 
-
-
-
         # Compute Average Train Loss
         avg_train_loss = run_train_loss/len(train_loader.dataset)
 
@@ -301,7 +314,6 @@ if __name__ == "__main__":
             allow_pickle=True
         )
 
-
         # Train Metrics
         # Acc
         train_metrics[epoch, 0] = train_acc
@@ -318,6 +330,16 @@ if __name__ == "__main__":
             allow_pickle=True
         )
 
+        # Log metrics to wandb
+        wandb.log(
+            {
+                "train_loss": avg_train_loss,
+                "train_accuracy": train_acc,
+                "train_precision": train_precision,
+                "train_recall": train_recall,
+                "train_f1_score": train_f1
+            }
+        )
 
         # Update Variables
         # Min Training Loss
@@ -330,10 +352,6 @@ if __name__ == "__main__":
             torch.save(model.state_dict(), model_path)
             print(f"Successfully saved at: {model_path}")
 
-
-
-
-
         # Validation Loop
         print("Validation Phase")
 
@@ -342,10 +360,8 @@ if __name__ == "__main__":
         y_val_true = list()
         y_val_pred = list()
 
-
         # Running train loss
         run_val_loss = 0.0
-
 
         # Put model in evaluation mode
         model.eval()
@@ -382,14 +398,10 @@ if __name__ == "__main__":
                 # s_logits = torch.argmax(s_logits, dim=1)
                 # y_val_pred += list(s_logits.cpu().detach().numpy())
 
-
-
                 # Ativação Softmax e predição de classes
                 s_logits = torch.nn.Softmax(dim=1)(logits) #converte as saídas em probbabilidades
                 s_logits = torch.argmax(s_logits, dim=1) # determinar a classe perdida
                 y_val_pred += list(s_logits.cpu().detach().numpy())
-
-            
 
             # Compute Average Train Loss
             avg_val_loss = run_val_loss/len(val_loader.dataset)
@@ -413,7 +425,6 @@ if __name__ == "__main__":
                 allow_pickle=True
             )
 
-
             # Train Metrics
             # Acc
             val_metrics[epoch, 0] = val_acc
@@ -430,6 +441,17 @@ if __name__ == "__main__":
                 allow_pickle=True
             )
 
+            # Log metrics to wandb
+            wandb.log(
+                {
+                    "val_loss": avg_val_loss,            
+                    "val_accuracy": val_acc,
+                    "val_precision": val_precision,
+                    "val_recall": val_recall,
+                    "val_f1_score": val_f1
+                }
+            )
+
             # Update Variables
             # Min validation loss and save if validation loss decreases
             if avg_val_loss < min_val_loss:
@@ -443,6 +465,7 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), model_path)
                 print(f"Successfully saved at: {model_path}")
 
-
+    # Finish W&B run
+    wandb.finish()
 
 print("Finished.")

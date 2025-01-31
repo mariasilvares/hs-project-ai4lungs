@@ -1,9 +1,4 @@
 #!/bin/bash
-#SBATCH --partition=TODO
-#SBATCH --qos=TODO
-#SBATCH --job-name=TODO
-#SBATCH --output=TODO.out
-#SBATCH --error=TODO.err
 
 
 
@@ -25,7 +20,7 @@ python src/model_trainval.py \
  --height 64 \
  --width 64 \
  --nr_classes 3 \
- --epochs 1 \
+ --epochs 3 \
  --batch_size 32 \
  --base_data_path '/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray'
 
@@ -45,7 +40,7 @@ python src/model_trainval.py \
  --height 64 \
  --width 64 \
  --nr_classes 3 \
- --epochs 1 \
+ --epochs 3 \
  --batch_size 32 \
  --base_data_path '/home/mariareissilvares/Documents/hs-project-ai4lungs/data/PulmonaryChestXRaAbnormalities'
 echo "Job finished!"
