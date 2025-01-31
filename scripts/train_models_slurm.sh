@@ -24,9 +24,7 @@ python src/model_trainval.py \
  --nr_classes 3 \
  --epochs 3 \
  --batch_size 32 \
- --base_data_path '/nas-ctm01/datasets/public/MEDICAL/mrsilvares/data' \
- --dataset_opencv_xray "/nas-ctm01/datasets/public/MEDICAL/DatasetOpenCVXray" \
- --dataset_pulmonary_chest_xray_abnormalities "/nas-ctm01/datasets/public/MEDICAL/PulmonaryChestXRaAbnormalities"
+ --base_data_path '/nas-ctm01/datasets/public/MEDICAL/DatasetOpenCVXray'
 
 
 
@@ -46,9 +44,7 @@ python src/model_trainval.py \
  --nr_classes 3 \
  --epochs 3 \
  --batch_size 32 \
- --base_data_path '/nas-ctm01/datasets/public/MEDICAL/mrsilvares/data' \
- --dataset_opencv_xray "/nas-ctm01/datasets/public/MEDICAL/DatasetOpenCVXray" \
- --dataset_pulmonary_chest_xray_abnormalities "/nas-ctm01/datasets/public/MEDICAL/PulmonaryChestXRaAbnormalities"
+ --base_data_path '/nas-ctm01/datasets/public/MEDICAL/PulmonaryChestXRaAbnormalities'
 
 
 
