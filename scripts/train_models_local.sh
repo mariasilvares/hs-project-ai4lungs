@@ -10,7 +10,7 @@ python src/model_trainval.py \
  --results_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results' \
  --weights_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights' \
  --history_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/history' \
- --data_augmentation True \
+ --data_augmentation \
  --model_name 'OpenCVXRayNN' \
  --dataset_name 'OpenCVXray' \
  --channels 3 \
@@ -28,7 +28,6 @@ python src/model_trainval.py \
  --results_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results' \
  --weights_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights' \
  --history_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/history' \
- --data_augmentation False \
  --model_name 'OpenCVXRayNN' \
  --dataset_name 'OpenCVXray' \
  --channels 3 \
@@ -46,7 +45,7 @@ python src/model_trainval.py \
  --results_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results' \
  --weights_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights' \
  --history_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/history' \
- --data_augmentation True \
+ --data_augmentation \
  --model_name 'ChestXRayNN' \
  --dataset_name 'ChestXRayAbnormalities' \
  --channels 3 \
@@ -64,7 +63,6 @@ python src/model_trainval.py \
  --results_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results' \
  --weights_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights' \
  --history_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/history' \
- --data_augmentation False \
  --model_name 'ChestXRayNN' \
  --dataset_name 'ChestXRayAbnormalities' \
  --channels 3 \

@@ -54,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('--results_dir', type=str, required=True, help='The path to the results directory.')
     parser.add_argument('--weights_dir', type=str, help='Directory for saving model weights.')  
     parser.add_argument('--history_dir', type=str, help='Directory for saving training history.')  
-    parser.add_argument("--data_augmentation", type=bool, default=False, help="Enable or disable data augmentation")
+    parser.add_argument("--data_augmentation", action="store_true", help="Enable or disable data augmentation")
     parser.add_argument('--model_name', type=str, choices=['OpenCVXRayNN', 'ChestXRayNN'], required=True, help='Name of the model to be used') 
     parser.add_argument('--dataset_name', type=str, required=True, help='The dataset for the experiments.')  
     parser.add_argument('--channels', type=int, default=3, help="Número de canais da imagem.")  
@@ -308,11 +308,18 @@ if __name__ == "__main__":
         # Train Loss
         train_losses[epoch] = avg_train_loss
         # Save it to directory
-        np.save(
-            file=os.path.join(history_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}_losses.npy"),
-            arr=train_losses,
-            allow_pickle=True
-        )
+        if DATA_AUGMENTATION:
+            np.save(
+                file=os.path.join(history_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}_losses_da.npy"),
+                arr=train_losses,
+                allow_pickle=True
+            )
+        else:
+            np.save(
+                file=os.path.join(history_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}_losses.npy"),
+                arr=train_losses,
+                allow_pickle=True
+            )
 
         # Train Metrics
         # Acc
@@ -324,11 +331,19 @@ if __name__ == "__main__":
         # F1-Score
         train_metrics[epoch, 3] = train_f1
         # Save it to directory
-        np.save(
-            file=os.path.join(history_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}_metrics.npy"),
-            arr=train_metrics,
-            allow_pickle=True
-        )
+        if DATA_AUGMENTATION:
+            np.save(
+                file=os.path.join(history_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}_metrics_da.npy"),
+                arr=train_metrics,
+                allow_pickle=True
+            )
+        else:
+            np.save(
+                file=os.path.join(history_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}_metrics.npy"),
+                arr=train_metrics,
+                allow_pickle=True
+            )
+
 
         # Log metrics to wandb
         wandb.log(
@@ -348,7 +363,11 @@ if __name__ == "__main__":
             min_train_loss = avg_train_loss
 
             # Save checkpoint
-            model_path = os.path.join(weights_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}.pt")
+            if DATA_AUGMENTATION:
+                model_path = os.path.join(weights_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}_da.pt")
+            else:
+                model_path = os.path.join(weights_dir, f"{model_name.lower()}_tr_{dataset_name.lower()}.pt")
+
             torch.save(model.state_dict(), model_path)
             print(f"Successfully saved at: {model_path}")
 
@@ -418,12 +437,21 @@ if __name__ == "__main__":
             # Append values to the arrays
             # Train Loss
             val_losses[epoch] = avg_val_loss
-            # Save it to directory
-            np.save(
-                file=os.path.join(history_dir, f"{model_name.lower()}_val_{dataset_name.lower()}_losses.npy"),
-                arr=val_losses,
-                allow_pickle=True
-            )
+
+            if DATA_AUGMENTATION:
+                # Save it to directory
+                np.save(
+                    file=os.path.join(history_dir, f"{model_name.lower()}_val_{dataset_name.lower()}_losses_da.npy"),
+                    arr=val_losses,
+                    allow_pickle=True
+                )
+            else:
+                # Save it to directory
+                np.save(
+                    file=os.path.join(history_dir, f"{model_name.lower()}_val_{dataset_name.lower()}_losses.npy"),
+                    arr=val_losses,
+                    allow_pickle=True
+                )
 
             # Train Metrics
             # Acc
@@ -435,7 +463,14 @@ if __name__ == "__main__":
             # F1-Score
             val_metrics[epoch, 3] = val_f1
             # Save it to directory
-            np.save(
+            if DATA_AUGMENTATION:
+                np.save(
+                    file=os.path.join(history_dir, f"{model_name.lower()}_val_{dataset_name.lower()}_metrics_da.npy"),
+                    arr=val_metrics,
+                    allow_pickle=True
+                )
+            else:
+                np.save(
                 file=os.path.join(history_dir, f"{model_name.lower()}_val_{dataset_name.lower()}_metrics.npy"),
                 arr=val_metrics,
                 allow_pickle=True
@@ -461,7 +496,10 @@ if __name__ == "__main__":
                 # print("Saving best model on validation...")
 
                 # Save checkpoint
-                model_path = os.path.join(weights_dir, f"{model_name.lower()}_val_{dataset_name.lower()}.pt")
+                if DATA_AUGMENTATION:
+                    model_path = os.path.join(weights_dir, f"{model_name.lower()}_val_{dataset_name.lower()}_da.pt")
+                else:
+                    os.path.join(weights_dir, f"{model_name.lower()}_val_{dataset_name.lower()}.pt")
                 torch.save(model.state_dict(), model_path)
                 print(f"Successfully saved at: {model_path}")
 
