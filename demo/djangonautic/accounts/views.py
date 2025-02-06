@@ -6,6 +6,7 @@ from django.contrib import messages
 from .models import Patient, MedicalImage, Activity, PatientInfo
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from .inference import predict
 
 # Create your views here.
 def signup_view(request):
@@ -145,11 +146,22 @@ def medical_image(request, paciente_id):
             medical_image.patient = paciente
             medical_image.save()
 
+            # Caminho para a imagem salva
+            image_path = medical_image.image.path
+
+            # Realize a inferência
+            prediction = predict(image_path)
+
+            # Salve a predição ou passe para o contexto
+            medical_image.description = prediction
+            medical_image.save()
+
             messages.success(request, 'X-ray uploaded with success!')
             return redirect('accounts:medical_image', paciente_id=paciente.id)
     else:
         form = MedicalImageForm()
-
+        
+    images = MedicalImage.objects.filter(patient=paciente)
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images, 'form': form})
 
 

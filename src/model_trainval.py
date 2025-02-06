@@ -20,8 +20,6 @@ import wandb
 from model_utilities import OpenCVXRayNN, ChestXRayNN
 from dataset_utilities import OpenCVXray, ChestXRayAbnormalities
 
-
-
 # Function: See the seed for reproducibility purposes
 def set_seed(seed=42):
 
@@ -224,7 +222,6 @@ if __name__ == "__main__":
     val_loader = DataLoader(dataset=val_set, batch_size=BATCH_SIZE, shuffle=False)
 
     # Train model and save best weights on validation set
-    # Initialise min_train and min_val loss trackers
     min_train_loss = np.inf
     min_val_loss = np.inf
 
