@@ -133,8 +133,12 @@
                     </div>
                 
                     <!-- Diagnóstico -->
-                    <div class="diagnostic" style="padding: 10px 15px; background-color: #464444; border-top: 1px solid #464444; border-radius: 0 0 10px 10px;">
-                        <p style="font-size: 14px; color: #c4bebe;"><strong>Diagnosis:</strong> <span class="diagnostic-result" style="display: none; color: #8f3b37;font-weight: 700;">Cancer</span></p>
+                    <div class="diagnostic">
+                        <p style="font-size: 14px; color: #c4bebe;"><strong>Diagnosis:</strong> 
+                            <span class="diagnostic-result" style="display: none; color: #8f3b37; font-weight: 700;">
+                                {{ image.diagnosis.result }}
+                            </span>
+                        </p>
                         <button type="button" onclick="toggleDiagnostic(this)" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;">
                             See Diagnosis
                         </button>

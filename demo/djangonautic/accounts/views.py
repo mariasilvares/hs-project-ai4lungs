@@ -7,6 +7,10 @@ from .models import Patient, MedicalImage, Activity, PatientInfo
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .inference import predict
+from django.shortcuts import render, redirect
+from django.contrib import messages
+import cv2
+from model_utilities import OpenCVXRayNN 
 
 # Create your views here.
 def signup_view(request):
@@ -131,39 +135,35 @@ def excluir_paciente(request, paciente_id):
 
 
 def medical_image(request, paciente_id):
-    # Obtém o paciente a partir do ID
     paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
-
-    # Obtém as imagens médicas associadas ao paciente
     images = MedicalImage.objects.filter(patient=paciente)
+    prediction = None  # Inicializa a variável de predição
 
-    # Verifica se o formulário de upload foi submetido
     if request.method == 'POST' and 'image' in request.FILES:
         form = MedicalImageForm(request.POST, request.FILES)
         if form.is_valid():
-            # Associa a imagem ao paciente
             medical_image = form.save(commit=False)
             medical_image.patient = paciente
             medical_image.save()
 
-            # Caminho para a imagem salva
             image_path = medical_image.image.path
+            prediction = predict(image_path)  # Chama a predição do modelo
 
-            # Realize a inferência
-            prediction = predict(image_path)
-
-            # Salve a predição ou passe para o contexto
-            medical_image.description = prediction
+            medical_image.description = prediction  # Salva a predição na imagem
             medical_image.save()
 
-            messages.success(request, 'X-ray uploaded with success!')
+            messages.success(request, 'X-ray uploaded successfully!')
             return redirect('accounts:medical_image', paciente_id=paciente.id)
+
     else:
         form = MedicalImageForm()
-        
-    images = MedicalImage.objects.filter(patient=paciente)
-    return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images, 'form': form})
 
+    return render(request, 'accounts/medical_image.html', {
+        'paciente': paciente,
+        'images': images,
+        'form': form,
+        'prediction': prediction  # Passa a predição para o template
+    })
 
 def add_patient_info(request, paciente_id):
     paciente = Patient.objects.get(id=paciente_id)
@@ -202,3 +202,22 @@ def delete_patient_info(request, info_id):
         except PatientInfo.DoesNotExist:
             return JsonResponse({'error': 'Information not found.'}, status=404)
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+def analyze_image(image_path):
+    # Carregar e processar a imagem com OpenCV (ou outro pré-processamento necessário)
+    image = cv2.imread(image_path)
+    processed_image = MedicalImage(image)  # Função para pré-processamento 
+
+    # Carregar o modelo treinado
+    model = OpenCVXRayNN()  # Instância do seu modelo
+    prediction = model.predict(processed_image)  # Fazendo a predição
+
+    # Interpretar o resultado (assumindo que o modelo retorna um rótulo como 'COVID', 'Pneumonia', 'Normal')
+    if prediction == 0:
+        return "Normal"
+    elif prediction == 1:
+        return "COVID"
+    elif prediction == 2:
+        return "Pneumonia"
+    else:
+        return "Unknown"

@@ -1,10 +1,10 @@
 import os
 import torch
-from .model_utilities import OpenCVXRayNN, ChestXRayNN
+from model_utilities import OpenCVXRayNN, ChestXRayNN
 
 # caminho para os pesos do modelo
 MODEL_NAME = 'OpenCVXRayNN' 
-WEIGHTS_PATH = os.path.join('/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights', f'{MODEL_NAME.lower()}_val_OpenCVXray.pt')
+WEIGHTS_PATH = os.path.join('/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights/', f'{MODEL_NAME.lower()}_val_opencvxray_da.pt')
 
 # Inicializa o modelo
 if MODEL_NAME == 'OpenCVXRayNN':

@@ -41,7 +41,7 @@ class Patient(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='patients')  # Relaciona com User
     name = models.CharField(max_length=255)  # Nome do paciente
     number = models.CharField(max_length=50, unique=True)  # Número único do paciente
-    registration_date = models.DateTimeField(auto_now_add=True)  # Data de registro
+    registration_date = models.DateTimeField(auto_now_add=True)  # Data de registo
 
     def __str__(self):
         return f"{self.name} ({self.number})"
@@ -59,4 +59,9 @@ class PatientInfo(models.Model):
     patient = models.ForeignKey(Patient, related_name="patientinfo_set", on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    # Outros campos relacionados à informação...
+
+class Diagnosis(models.Model):
+    paciente = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    image = models.ForeignKey(MedicalImage, on_delete=models.CASCADE)
+    result = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
