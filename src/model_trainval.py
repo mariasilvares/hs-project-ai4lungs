@@ -496,7 +496,7 @@ if __name__ == "__main__":
                 if DATA_AUGMENTATION:
                     model_path = os.path.join(weights_dir, f"{model_name.lower()}_val_{dataset_name.lower()}_da.pt")
                 else:
-                    os.path.join(weights_dir, f"{model_name.lower()}_val_{dataset_name.lower()}.pt")
+                    model_path = os.path.join(weights_dir, f"{model_name.lower()}_val_{dataset_name.lower()}.pt")
                 torch.save(model.state_dict(), model_path)
                 print(f"Successfully saved at: {model_path}")
 

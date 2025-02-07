@@ -12,9 +12,6 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-# W&B Imports
-import wandb
-
 # Project Imports
 from model_utilities import ChestXRayNN, OpenCVXRayNN
 from dataset_utilities import ChestXRayAbnormalities, OpenCVXray
@@ -110,38 +107,30 @@ def main():
     
     LOSS = torch.nn.CrossEntropyLoss()
     
-    # Loop de Teste
     with torch.no_grad():
         for images, labels in tqdm(test_loader):
             images, labels = images.to(DEVICE), labels.to(DEVICE)
-
-            # Forward pass
             logits = model(images)
             loss = LOSS(logits, labels)
             run_test_loss += loss.item() * images.size(0)
-
-            # Predição
             probabilities = torch.nn.Softmax(dim=1)(logits)
             predictions = torch.argmax(probabilities, dim=1)
-            
             y_test_true.extend(labels.cpu().numpy())
             y_test_pred.extend(predictions.cpu().numpy())
     
-    # Cálculo das métricas
     avg_test_loss = run_test_loss / len(test_loader.dataset)
     test_acc = accuracy_score(y_test_true, y_test_pred)
     test_recall = recall_score(y_test_true, y_test_pred, average='macro')
     test_precision = precision_score(y_test_true, y_test_pred, average='macro')
     test_f1 = f1_score(y_test_true, y_test_pred, average='macro')
     
-    # Resultados
     print(f"Test Loss: {avg_test_loss:.4f}")
     print(f"Test Accuracy: {test_acc:.4f}")
     print(f"Test Recall: {test_recall:.4f}")
     print(f"Test Precision: {test_precision:.4f}")
     print(f"Test F1-Score: {test_f1:.4f}")
     
-    # Salvar os resultados do teste com/sem data_augmentation
+    # Salva OS resultados com ou sem data augmentation
     if args.data_augmentation:
         np.save(
             file=os.path.join(args.history_dir, f"{args.model_name.lower()}_ts_{args.dataset_name.lower()}_losses_da.npy"),
@@ -165,7 +154,5 @@ def main():
             allow_pickle=True
         )
     
-    wandb.finish()
-
 if __name__ == "__main__":
     main()
