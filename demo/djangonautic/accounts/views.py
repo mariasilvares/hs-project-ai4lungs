@@ -9,8 +9,19 @@ from django.views.decorators.csrf import csrf_exempt
 from .inference import predict
 from django.shortcuts import render, redirect
 from django.contrib import messages
-import cv2
 from model_utilities import OpenCVXRayNN 
+import os
+import torch
+import json
+from PIL import Image
+from django.shortcuts import render, redirect
+from django.core.files.storage import default_storage
+from django.http import JsonResponse
+from .models import MedicalImage
+from .forms import MedicalImageForm
+from torchvision import transforms
+from model_utilities import OpenCVXRayNN, ChestXRayNN # Importe o modelo treinado
+
 
 # Create your views here.
 def signup_view(request):
@@ -203,21 +214,45 @@ def delete_patient_info(request, info_id):
             return JsonResponse({'error': 'Information not found.'}, status=404)
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-def analyze_image(image_path):
-    # Carregar e processar a imagem com OpenCV (ou outro pré-processamento necessário)
-    image = cv2.imread(image_path)
-    processed_image = MedicalImage(image)  # Função para pré-processamento 
 
-    # Carregar o modelo treinado
-    model = OpenCVXRayNN()  # Instância do seu modelo
-    prediction = model.predict(processed_image)  # Fazendo a predição
+# Carregar o modelo treinado
+model_path = "/nas-ctm01/datasets/public/MEDICAL/mrsilvares/results/weights/OpenCVXRayNN_best.pth"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = OpenCVXRayNN()
+model.load_state_dict(torch.load(model_path, map_location=device))
+model.eval()
 
-    # Interpretar o resultado (assumindo que o modelo retorna um rótulo como 'COVID', 'Pneumonia', 'Normal')
-    if prediction == 0:
-        return "Normal"
-    elif prediction == 1:
-        return "COVID"
-    elif prediction == 2:
-        return "Pneumonia"
-    else:
-        return "Unknown"
+# Transformações para pré-processamento da imagem
+transform = transforms.Compose([
+    transforms.Resize((64, 64)),
+    transforms.ToTensor(),
+])
+
+def predict_image(image_path):
+    """Processa a imagem e faz a predição usando o modelo treinado."""
+    image = Image.open(image_path).convert("RGB")
+    image = transform(image).unsqueeze(0).to(device)
+
+    with torch.no_grad():
+        output = model(image)
+        predicted_class = torch.argmax(output, dim=1).item()
+
+    # Mapear a predição para uma classe interpretável
+    classes = {0: "Normal", 1: "Pneumonia", 2: "Câncer"}
+    return classes.get(predicted_class, "Indeterminado")
+
+def upload_image(request):
+    if request.method == "POST":
+        form = MedicalImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            image_instance = form.save()
+            image_path = image_instance.image.path
+
+            # Chamar a função de predição
+            diagnosis = predict_image(image_path)
+            image_instance.diagnosis = diagnosis
+            image_instance.save()
+
+            return JsonResponse({"diagnosis": diagnosis, "image_url": image_instance.image.url})
+
+    return JsonResponse({"error": "Erro no upload da imagem."}, status=400)

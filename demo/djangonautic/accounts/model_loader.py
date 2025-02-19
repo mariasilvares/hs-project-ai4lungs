@@ -1,4 +1,5 @@
 import os
+import sys
 import torch
 from model_utilities import OpenCVXRayNN, ChestXRayNN
 
@@ -17,3 +18,11 @@ else:
 # Carrega os pesos do modelo
 model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=torch.device('cpu')))
 model.eval()  # Coloca o modelo em modo de avaliação
+
+
+# Obtém o caminho absoluto do diretório pai
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+# Adiciona o diretório 'src' ao sys.path
+sys.path.append(os.path.join(parent_dir, 'src'))
+
+from model_utilities import OpenCVXRayNN, ChestXRayNN

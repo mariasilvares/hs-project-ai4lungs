@@ -49,12 +49,11 @@ class Patient(models.Model):
 class MedicalImage(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='medical_images/')
-    description = models.TextField()
-
+    # Adicione este campo:
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-                return f"Image by {self.paciente.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
-    
+        return f"Image by {self.patient.name}"
 class PatientInfo(models.Model):
     patient = models.ForeignKey(Patient, related_name="patientinfo_set", on_delete=models.CASCADE)
     title = models.CharField(max_length=200)

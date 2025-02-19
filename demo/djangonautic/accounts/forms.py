@@ -27,4 +27,4 @@ class PatientForm(forms.ModelForm):
 class MedicalImageForm(forms.ModelForm):
     class Meta:
         model = MedicalImage
-        fields = ['image', 'description']
+        fields = ['patient', 'image', 'description']
