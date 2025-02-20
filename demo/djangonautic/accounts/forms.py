@@ -1,4 +1,3 @@
-# forms.py
 from django import forms
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
@@ -27,4 +26,5 @@ class PatientForm(forms.ModelForm):
 class MedicalImageForm(forms.ModelForm):
     class Meta:
         model = MedicalImage
-        fields = ['patient', 'image', 'description']
+        fields = ['image', 'description']
+

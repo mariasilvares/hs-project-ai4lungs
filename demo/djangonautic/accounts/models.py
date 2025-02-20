@@ -20,12 +20,12 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.userprofile.save()
 
-
 class Activity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     action = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)
     additional_info = models.TextField(blank=True, null=True)
+    details = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.action}"
@@ -35,32 +35,27 @@ class Activity(models.Model):
             return 'Profile Change'
         elif self.action == 'image_upload':
             return 'X-Ray Uploaded'
-        return self.action  # Retorna o valor original de 'action'
+        return self.action  
 
 class Patient(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='patients')  # Relaciona com User
     name = models.CharField(max_length=255)  # Nome do paciente
     number = models.CharField(max_length=50, unique=True)  # Número único do paciente
-    registration_date = models.DateTimeField(auto_now_add=True)  # Data de registo
+    registration_date = models.DateTimeField(auto_now_add=True)  # Data de registro
 
     def __str__(self):
         return f"{self.name} ({self.number})"
-    
+
 class MedicalImage(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='medical_images/')
-    # Adicione este campo:
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField()
 
     def __str__(self):
-        return f"Image by {self.patient.name}"
+                return f"Image by {self.paciente.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
+
 class PatientInfo(models.Model):
     patient = models.ForeignKey(Patient, related_name="patientinfo_set", on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
-
-class Diagnosis(models.Model):
-    paciente = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    image = models.ForeignKey(MedicalImage, on_delete=models.CASCADE)
-    result = models.CharField(max_length=50)
-    created_at = models.DateTimeField(auto_now_add=True)
+    # Outros campos relacionados à informação...
