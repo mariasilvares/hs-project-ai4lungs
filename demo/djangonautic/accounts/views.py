@@ -4,8 +4,9 @@ from django.contrib.auth import login, logout
 from .forms import UserEditForm, UserProfileForm,PatientForm, MedicalImageForm
 from django.contrib import messages
 from .models import Patient, MedicalImage, Activity, PatientInfo
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
+from accounts.inference import predict_xray
 
 # Create your views here.
 def signup_view(request):
@@ -189,3 +190,14 @@ def delete_image(request, image_id):
             return JsonResponse({'error': 'Image not found.'}, status=404)
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+def run_model(request, image_id):
+    # Buscar a imagem ao banco de dados
+    image = get_object_or_404(MedicalImage, id=image_id)
+
+    # Caminho real do arquivo da imagem
+    image_path = image.file.path  
+
+    # Fazer a previsão
+    result = predict_xray(image_path)
+
+    return JsonResponse({"prediction": result})

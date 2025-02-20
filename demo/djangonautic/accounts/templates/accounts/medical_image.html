@@ -134,13 +134,20 @@
                 
                     <!-- Diagnóstico -->
                     <div class="diagnostic" style="padding: 10px 15px; background-color: #464444; border-top: 1px solid #464444; border-radius: 0 0 10px 10px;">
-                        <p style="font-size: 14px; color: #c4bebe;"><strong>Diagnosis:</strong> <span class="diagnostic-result" style="display: none; color: #8f3b37;font-weight: 700;">Cancer</span></p>
+                        <p style="font-size: 14px; color: #c4bebe;">
+                            <strong>Diagnosis:</strong> 
+                            <span class="diagnostic-result" style="display: none; color: #8f3b37; font-weight: 700;">Cancer</span>
+                        </p>
                         <button type="button" onclick="toggleDiagnostic(this)" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;">
                             See Diagnosis
                         </button>
+                        <!-- Novo botão Run Model -->
+                        <button type="button" onclick="runModel('{{ image.id }}')" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; margin-top: 5px;">
+                            Run Model
+                        </button>
                     </div>
+
                 </div>
-                
                 {% endfor %}
             </div>
         {% else %}
@@ -170,8 +177,21 @@
 </div>
 
 
+<button id="runModelBtn" data-image-id="{{ image.id }}">Run Model</button>
 
 <script>
+
+document.getElementById("runModelBtn").addEventListener("click", function() {
+    var imageId = this.getAttribute("data-image-id");
+
+    fetch(`/accounts/run_model/${imageId}`)
+    .then(response => response.json())
+    .then(data => {
+        alert("Previsão do modelo: " + data.prediction);
+    })
+    .catch(error => console.error("Erro ao executar o modelo:", error));
+});
+
     function toggleForm() {
         const form = document.getElementById("add-info-form");
         const button = document.getElementById("add-info-btn");
