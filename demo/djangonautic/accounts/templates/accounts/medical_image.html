@@ -142,7 +142,7 @@
                             See Diagnosis
                         </button>
                         <!-- Novo botão Run Model -->
-                        <button type="button" onclick="runModel('{{ image.id }}')" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; margin-top: 5px;">
+                        <button id="runModelBtn" data-image-id="{{ image.id }}" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; margin-top: 5px;">
                             Run Model
                         </button>
                     </div>
@@ -175,9 +175,6 @@
     <p style="font-size: 16px; color: #c4bebe; text-align: center;">No diagnostic history available.</p>
     {% endif %}
 </div>
-
-
-<button id="runModelBtn" data-image-id="{{ image.id }}">Run Model</button>
 
 <script>
 
