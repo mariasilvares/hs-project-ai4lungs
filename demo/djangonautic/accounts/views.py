@@ -196,7 +196,7 @@ label_map = {0: 'covid', 1: 'pneumonia', 2: 'normal'}
 def run_model(request, image_id):
     image = get_object_or_404(MedicalImage, id=image_id)
     image_path = image.image.path  
-    result = predict_xray(image_path)  # Supondo que retorne 0, 1 ou 2
+    result = predict_xray(image_path)  # Retorna 0, 1 ou 2
 
     # Converte o número para texto
     result_label = label_map[result]

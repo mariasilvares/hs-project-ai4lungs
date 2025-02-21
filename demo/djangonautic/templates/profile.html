@@ -9,7 +9,7 @@
     {% if messages %}
     <ul class="messages" style="max-width: 600px; margin: 70px auto; list-style: none; padding: 0; text-align: center;">
         {% for message in messages %}
-        <li class="message-item" style="background-color: #485188; color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">
+        <li class="message-item" style="background-color: rgb(204, 131, 113)188; color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">
             {{ message }}
         </li>
         {% endfor %}
@@ -28,9 +28,9 @@
     <div class="profile-header" style="display: flex; align-items: center; margin-bottom: 20px;">
         <div class="profile-picture" style="flex-shrink: 0; margin-right: 20px;">
             {% if user.userprofile.profile_picture %}
-                <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de perfil" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
+                <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de perfil" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid rgb(204, 131, 113);">
             {% else %}
-                <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
+                <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid rgb(204, 131, 113);">
             {% endif %}
         </div>
         <div class="profile-info" style="color: #c4bebe;">
@@ -42,10 +42,10 @@
 
     <!-- Ações do Perfil -->
     <div class="profile-actions" style="display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 30px;">
-        <a href="{% url 'accounts:profile_edit' %}" class="btn" style="padding: 10px 20px; background-color: #485188; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
+        <a href="{% url 'accounts:profile_edit' %}" class="btn" style="padding: 10px 20px; background-color: rgb(204, 131, 113); color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
             Edit profile
         </a>
-        <a href="{% url 'change_password' %}" class="btn" style="padding: 10px 20px; background-color: #485188; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
+        <a href="{% url 'change_password' %}" class="btn" style="padding: 10px 20px; background-color: rgb(204, 131, 113); color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
             Change Password
         </a>
         <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0;">

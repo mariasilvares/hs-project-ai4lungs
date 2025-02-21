@@ -7,7 +7,7 @@
     {% if messages %}
     <ul class="messages" style="max-width: 600px; margin: 70px auto; list-style: none; padding: 0; text-align: center;">
         {% for message in messages %}
-        <li class="message-item" style="background-color: #485188; color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">
+        <li class="message-item" style="background-color: rgb(218, 138, 107); color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">
             {{ message }}
         </li>
         {% endfor %}
@@ -55,7 +55,7 @@
 
                 <!-- Botão Add Information -->
                 <div id="add-info-btn-container" style="margin-top: 30px; text-align: center;">
-                    <button id="add-info-btn" onclick="toggleForm()" style="padding: 12px 30px; background-color: #485188; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+                    <button id="add-info-btn" onclick="toggleForm()" style="padding: 12px 30px; background-color: rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
                         Add Information
                     </button>
                 </div>
@@ -74,7 +74,7 @@
                             <textarea id="info-description" name="description" rows="5" class="form-control" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" required></textarea>
                         </div>
 
-                        <button type="submit" style="margin-top: 25px; padding: 12px 30px; background-color: #485188; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+                        <button type="submit" style="margin-top: 25px; padding: 12px 30px; background-color:rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
                             Save Information
                         </button>
 
@@ -93,7 +93,21 @@
         <h3 style="font-size: 24px; color: #383737; font-weight: 600; margin-bottom: 30px;">Upload X-Ray</h3>
         <p style="font-size: 16px; color: #c4bebe; margin-bottom: 40px; max-width: 500px; margin: 0 auto;">Upload an X-Ray for analysis. The system uses AI to detect possible signs of cancer, helping with the diagnosis.</p>
 
-        z
+        <div class="upload-container" style="background-color: #464444; border-radius: 10px; padding: 30px; width: 100%; max-width: 450px; margin: 0 auto;">
+            <form method="post" enctype="multipart/form-data" action="{% url 'accounts:upload_image' paciente.id %}">
+                {% csrf_token %}
+                <div class="upload-box" id="upload-box" style="border: 2px dashed rgb(204, 131, 113); padding: 20px; text-align: center; position: relative; border-radius: 10px; background-color: #ebe5e5; cursor: pointer;">
+                    <span id="upload-instruction" style="font-size: 14px; color: rgb(204, 131, 113);">Drag your X-Ray here or click to select</span>
+                    <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; cursor: pointer;">
+                    <div id="image-preview" class="image-preview" style="margin-top: 20px;"></div>
+                </div>
+                <button type="submit" style="margin-top: 25px; padding: 12px 30px; background-color: rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Imagens Carregadas -->
     <div class="uploaded-images" style="margin-bottom: 100px; text-align: center;">
         <h3 style="font-size: 24px; color: #383737; font-weight: 600; margin-bottom: 30px;">Uploaded X-Rays</h3>
@@ -124,11 +138,11 @@
                         <strong>Diagnosis:</strong> 
                         <span class="diagnostic-result" style="display: none; color: #8f3b37; font-weight: 700;"></span>
                     </p>
-                    <button type="button" onclick="toggleDiagnostic(this)" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;">
+                    <button type="button" onclick="toggleDiagnostic(this)" style="background-color: rgb(204, 131, 113); color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;">
                         See Diagnosis
                     </button>
                     <!-- Botão Run Model -->
-                    <button type="button" class="run-model" data-image-id="{{ image.id }}" style="background-color: #485188; color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; margin-top: 5px;">
+                    <button type="button" class="run-model" data-image-id="{{ image.id }}" style="background-color: rgb(204, 131, 113); color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; margin-top: 5px;">
                         Run Model
                     </button>
                 </div>
@@ -308,7 +322,7 @@ function removeInfo(infoId) {
 }
 
 .button.danger {
-    background-color: #485188;
+    background-color:rgb(204, 131, 113);
     color: white;
 }
 
@@ -318,7 +332,7 @@ function removeInfo(infoId) {
 }
 
 .upload-box {
-    border: 2px dashed #485188;
+    border: 2px dashed rgb(204, 131, 113);
     padding: 20px;
     text-align: center;
     position: relative;

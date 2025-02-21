@@ -23,9 +23,9 @@
             <label for="id_profile_picture" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Profile picture:</label>
             <div style="margin-bottom: 10px;">
                 {% if user.userprofile.profile_picture %}
-                    <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de Perfil" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
+                    <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de Perfil" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid rgb(204, 131, 113);">
                 {% else %}
-                    <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #485188;">
+                    <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid rgb(204, 131, 113);">
                 {% endif %}
             </div>
             {{ profile_form.profile_picture }}
@@ -43,7 +43,7 @@
             </div>
         {% endif %}
 
-        <button type="submit" style="padding: 12px 30px; background-color: #485188; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+        <button type="submit" style="padding: 12px 30px; background-color: rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
             Save Changes
         </button>
     </form>

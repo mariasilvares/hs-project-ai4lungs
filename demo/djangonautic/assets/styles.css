@@ -86,8 +86,8 @@ a.highlight{
 .errorlist li{
     padding: 10px;
     list-style-type: none;
-    border: 1px solid #CD853F;
-    color: #CD853F;
+    border: 1px solid rgb(204, 131, 113);
+    color: rgb(204, 131, 113);
     margin: 10px 0;
 }
 
@@ -127,13 +127,13 @@ a.highlight{
 
 /* Estilo para links ativos */
 a.active {
-    color: rgb(103, 111, 158); /* texto vermelho */
+    color: rgb(204, 131, 113); /* texto vermelho */
     font-weight: bold; /* texto em negrito para destaque */
 }
 
 
 #confirm-logout {
-    background-color:rgb(72, 81, 136);
+    background-color:rgb(204, 131, 113);
     color: white;
 }
 
