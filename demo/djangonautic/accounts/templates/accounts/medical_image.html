@@ -93,19 +93,7 @@
         <h3 style="font-size: 24px; color: #383737; font-weight: 600; margin-bottom: 30px;">Upload X-Ray</h3>
         <p style="font-size: 16px; color: #c4bebe; margin-bottom: 40px; max-width: 500px; margin: 0 auto;">Upload an X-Ray for analysis. The system uses AI to detect possible signs of cancer, helping with the diagnosis.</p>
 
-        <div class="upload-container" style="background-color: #464444; border-radius: 10px; padding: 30px; width: 100%; max-width: 450px; margin: 0 auto;">
-            <form id="uploadForm" method="post" enctype="multipart/form-data" action="{% url 'accounts:upload_image' paciente.id %}">
-                {% csrf_token %}
-                <div class="upload-box" id="upload-box" style="border: 2px dashed #485188; padding: 20px; text-align: center; position: relative; border-radius: 10px; background-color: #ebe5e5; cursor: pointer;">
-                    <span id="upload-instruction" style="font-size: 14px; color: #485188;">Drag your X-Ray here or click to select</span>
-                    <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; cursor: pointer;">
-                    <div id="image-preview" class="image-preview" style="margin-top: 20px;"></div>
-                </div>
-                <button type="submit" style="margin-top: 25px; padding: 12px 30px; background-color: #485188; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
-                    Send
-                </button>
-            </form>
-        </div>
+        z
     <!-- Imagens Carregadas -->
     <div class="uploaded-images" style="margin-bottom: 100px; text-align: center;">
         <h3 style="font-size: 24px; color: #383737; font-weight: 600; margin-bottom: 30px;">Uploaded X-Rays</h3>
@@ -188,58 +176,6 @@ document.querySelectorAll(".run-model").forEach(function(button) {
             })
             .catch(error => console.error("Erro ao executar o modelo:", error));
     });
-});
-
-document.getElementById("uploadForm").addEventListener("submit", function(e) {
-    e.preventDefault(); // Impede o envio padrão do formulário
-
-    const form = e.target;
-    const formData = new FormData(form);
-
-    // Envia o formulário via fetch (AJAX)
-    fetch(form.action, {
-        method: "POST",
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Erro no upload");
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Supondo que data.new_image_id contenha o ID da nova imagem
-        const newImageId = data.new_image_id;
-
-        // Opcional: você pode atualizar dinamicamente a galeria de imagens aqui
-        // ou forçar um reload da página, se necessário.
-        // Exemplo: location.reload();
-
-        // Após o upload bem-sucedido, chama o run model para a nova imagem
-        fetch(`/accounts/run_model/${newImageId}/`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Erro na predição");
-                }
-                return response.json();
-            })
-            .then(resultData => {
-                // Aqui você pode atualizar a interface para exibir o resultado da predição.
-                // Exemplo: criar um novo card ou mostrar uma notificação.
-                // Para simplificar, vamos exibir um alerta:
-                alert("Upload e predição concluídos! Previsão: " + resultData.prediction);
-                
-                // Se a nova imagem já for exibida na galeria, você pode atualizar seu bloco diagnóstico:
-                // Exemplo:
-                // const newDiagSpan = document.querySelector(`#diagnosis-${newImageId}`);
-                // if(newDiagSpan){
-                //     newDiagSpan.textContent = "Previsão: " + resultData.prediction;
-                //     newDiagSpan.style.display = "inline";
-                // }
-            })
-            .catch(error => console.error("Erro ao executar o modelo:", error));
-    })
-    .catch(error => console.error("Erro no upload:", error));
 });
 
 function toggleForm() {
