@@ -1,28 +1,22 @@
+import torch
 import os
 import sys
-import torch
-from model_utilities import OpenCVXRayNN, ChestXRayNN
 
-# caminho para os pesos do modelo
-MODEL_NAME = 'OpenCVXRayNN' 
-WEIGHTS_PATH = os.path.join('/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights/', f'{MODEL_NAME.lower()}_val_opencvxray_da.pt')
+# Caminho para o diretório do projeto
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.insert(0, parent_dir)
 
-# Inicializa o modelo
-if MODEL_NAME == 'OpenCVXRayNN':
+# Caminho para os pesos do modelo
+MODEL_NAME = 'OpenCVXRayNN'
+WEIGHTS_PATH = os.path.join(parent_dir, 'results/weights', f'{MODEL_NAME.lower()}_val_opencvxray_da.pt')
+
+# Função para carregar o modelo 
+def load_model():
+    from src.model_utilities import OpenCVXRayNN
     model = OpenCVXRayNN(channels=3, height=64, width=64, nr_classes=3)
-elif MODEL_NAME == 'ChestXRayNN':
-    model = ChestXRayNN(channels=3, height=64, width=64, nr_classes=3)
-else:
-    raise ValueError(f"Modelo desconhecido: {MODEL_NAME}")
+    model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=torch.device('cpu')))
+    model.eval()
+    return model
 
-# Carrega os pesos do modelo
-model.load_state_dict(torch.load(WEIGHTS_PATH, map_location=torch.device('cpu')))
-model.eval()  # Coloca o modelo em modo de avaliação
-
-
-# Obtém o caminho absoluto do diretório pai
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-# Adiciona o diretório 'src' ao sys.path
-sys.path.append(os.path.join(parent_dir, 'src'))
-
-from model_utilities import OpenCVXRayNN, ChestXRayNN
+# Instancia o modelo apenas quando necessário
+model = load_model()

@@ -1,27 +1,30 @@
-# inference.py
 import torch
 from torchvision import transforms
 from PIL import Image
-from .model_loader import model
+from accounts.model_loader import load_model  # Agora importa a função, não o modelo
 
-def predict(image_path):
-    # Define as transformações necessárias
-    transform = transforms.Compose([
-        transforms.Resize((64, 64)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
+# Carrega o modelo apenas quando necessário
+model = load_model()
 
-    # Abre a imagem
-    image = Image.open(image_path).convert('RGB')
-    image = transform(image)
-    image = image.unsqueeze(0)  # Adiciona uma dimensão extra para o batch
+# Transformações de pré-processamento
+transform = transforms.Compose([
+    transforms.Resize((64, 64)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5], std=[0.5])
+])
 
-    # Realiza a inferência
-    with torch.no_grad():
-        outputs = model(image)
-        _, predicted = torch.max(outputs, 1)
+def predict_xray(image_path):
+    """
+    Realiza a predição de uma imagem de raio-X utilizando o modelo carregado.
+    """
+    try:
+        image = Image.open(image_path).convert('RGB')
+        image = transform(image).unsqueeze(0)
 
-    # Mapeia a predição para a classe correspondente
-    classes = ['Covid', 'Pneumonia', 'Normal'] 
-    return classes[predicted.item()]
+        with torch.no_grad():
+            output = model(image)
+            prediction = torch.argmax(output, dim=1).item()
+
+        return prediction
+    except Exception as e:
+        return f"Erro na predição: {e}"

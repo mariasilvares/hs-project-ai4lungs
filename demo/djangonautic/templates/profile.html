@@ -57,15 +57,42 @@
     </div>
 
     <!-- Histórico de Atividades -->
-    <div class="activity-history" style="background-color: #424040; padding: 50px;">
-        <h3 style="color: #ffffff; font-size: 22px; margin-bottom: 20px; text-align: center;">Atividades Recentes</h3>
-        <ul style="list-style: none; padding: 0; margin: 0;">
-            {% for activity in user.activity_set.all|slice:"5:" %}
-                <li style="color: #c4bebe; padding: 10px 0; border-bottom: 1px solid #555555;">{{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}</li>
-            {% empty %}
-                <li style="color: #c4bebe; text-align: center;">Recent Activities</li>
-            {% endfor %}
-        </ul>
-    </div>
+<div class="activity-history" style="background-color: #424040; padding: 50px;">
+    <h3 style="color: #ffffff; font-size: 22px; margin-bottom: 20px; text-align: center;">Atividades Recentes</h3>
+    
+    <ul id="activity-list" style="list-style: none; padding: 0; margin: 0;">
+        {% for activity in user.activity_set.all|dictsortreversed:"timestamp" %}
+            <li class="activity-item" style="color: #c4bebe; padding: 10px 0; border-bottom: 1px solid #555555;"
+                {% if forloop.counter > 5 %} hidden {% endif %}>
+                {{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}
+            </li>
+        {% empty %}
+            <li style="color: #c4bebe; text-align: center;">Sem atividades recentes</li>
+        {% endfor %}
+    </ul>
+
+    {% if user.activity_set.all|length > 5 %}
+        <button id="toggle-history" style="background-color: transparent; color: #ffffff; border: none; cursor: pointer; margin-top: 10px; display: block; text-align: right; width: 100%;">
+            Show All Activities
+        </button>
+    {% endif %}
 </div>
-{% endblock %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("toggle-history");
+        const activities = document.querySelectorAll(".activity-item");
+        let expanded = false;
+
+        toggleButton.addEventListener("click", function () {
+            activities.forEach((activity, index) => {
+                if (index >= 5) {
+                    activity.hidden = expanded;
+                }
+            });
+            expanded = !expanded;
+            toggleButton.textContent = expanded ? "Show less" : "Show All Activities";
+        });
+    });
+</script>
+{% endblock %} 

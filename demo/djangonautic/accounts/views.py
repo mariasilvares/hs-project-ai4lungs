@@ -4,24 +4,9 @@ from django.contrib.auth import login, logout
 from .forms import UserEditForm, UserProfileForm,PatientForm, MedicalImageForm
 from django.contrib import messages
 from .models import Patient, MedicalImage, Activity, PatientInfo
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
-from .inference import predict
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from model_utilities import OpenCVXRayNN 
-import os
-import torch
-import json
-from PIL import Image
-from django.shortcuts import render, redirect
-from django.core.files.storage import default_storage
-from django.http import JsonResponse
-from .models import MedicalImage
-from .forms import MedicalImageForm
-from torchvision import transforms
-from model_utilities import OpenCVXRayNN, ChestXRayNN # Importe o modelo treinado
-
+from accounts.inference import predict_xray
 
 # Create your views here.
 def signup_view(request):
@@ -90,6 +75,89 @@ def profile_edit(request):
     })
 
 
+def pacientes(request):
+    # Obtém os pacientes do usuário atual
+    pacientes = Patient.objects.filter(user=request.user)
+
+    if request.method == 'POST':
+        form = PatientForm(request.POST)
+        if form.is_valid():
+            # Associar o paciente ao usuário logado
+            paciente = form.save(commit=False)
+            paciente.user = request.user
+            paciente.save()
+
+             # Registra a atividade
+            Activity.objects.create(
+                user=request.user,
+                action=f"Added Patient {paciente.name}",
+                additional_info="A new patient has been registered."
+            )
+
+            messages.success(request, 'Patient added with success!')
+            return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
+    else:
+        form = PatientForm()
+
+    return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
+
+
+def excluir_paciente(request, paciente_id):
+
+    # Obtém o paciente a partir do ID, ou retorna 404 se não encontrado
+    paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
+
+    if request.method == 'POST':
+        # Excluir o paciente
+        paciente.delete()
+
+        # Registra a atividade
+        Activity.objects.create(
+            user=request.user,
+            action=f"Patient {paciente.name} deleted",
+            details=f"A patient was deleted"
+        )
+
+
+        messages.success(request, 'Patient deleted with success!')
+        return redirect('accounts:pacientes')  # Redireciona para a lista de pacientes
+
+    return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
+
+
+def add_patient_info(request, paciente_id):
+    paciente = Patient.objects.get(id=paciente_id)
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+
+        # Cria e salva as informações adicionais
+        PatientInfo.objects.create(patient=paciente, title=title, description=description)
+        
+        # Registra a atividade
+        Activity.objects.create(
+            user=request.user,
+            action=f"Added Information for the Patient {paciente.name}",
+        )
+    
+        # Redireciona para a página de detalhes do paciente
+        return redirect('accounts:upload_image', paciente_id=paciente.id)
+    
+    return render(request, 'accounts/add_patient_info.html', {'paciente': paciente})
+
+
+def delete_patient_info(request, info_id):
+    if request.method == 'DELETE':
+        try:
+            info = PatientInfo.objects.get(id=info_id)
+            info.delete()
+            return JsonResponse({'message': 'Information deleted successfully.'}, status=200)
+        except PatientInfo.DoesNotExist:
+            return JsonResponse({'error': 'Information not found.'}, status=404)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
 def upload_image(request, paciente_id):
     # Recupera o paciente com o ID fornecido
     paciente = get_object_or_404(Patient, id=paciente_id)
@@ -112,87 +180,6 @@ def upload_image(request, paciente_id):
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
 
 
-def pacientes(request):
-    # Obtém os pacientes do usuário atual
-    pacientes = Patient.objects.filter(user=request.user)
-
-    if request.method == 'POST':
-        form = PatientForm(request.POST)
-        if form.is_valid():
-            # Associar o paciente ao usuário logado
-            paciente = form.save(commit=False)
-            paciente.user = request.user
-            paciente.save()
-            messages.success(request, 'Patient added with success!')
-            return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
-    else:
-        form = PatientForm()
-
-    return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
-
-
-def excluir_paciente(request, paciente_id):
-
-    # Obtém o paciente a partir do ID, ou retorna 404 se não encontrado
-    paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
-
-    if request.method == 'POST':
-        # Excluir o paciente
-        paciente.delete()
-        messages.success(request, 'Patient deleted with success!')
-        return redirect('accounts:pacientes')  # Redireciona para a lista de pacientes
-
-    return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
-
-
-def medical_image(request, paciente_id):
-    paciente = get_object_or_404(Patient, id=paciente_id, user=request.user)
-    images = MedicalImage.objects.filter(patient=paciente)
-    prediction = None  # Inicializa a variável de predição
-
-    if request.method == 'POST' and 'image' in request.FILES:
-        form = MedicalImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            medical_image = form.save(commit=False)
-            medical_image.patient = paciente
-            medical_image.save()
-
-            image_path = medical_image.image.path
-            prediction = predict(image_path)  # Chama a predição do modelo
-
-            medical_image.description = prediction  # Salva a predição na imagem
-            medical_image.save()
-
-            messages.success(request, 'X-ray uploaded successfully!')
-            return redirect('accounts:medical_image', paciente_id=paciente.id)
-
-    else:
-        form = MedicalImageForm()
-
-    return render(request, 'accounts/medical_image.html', {
-        'paciente': paciente,
-        'images': images,
-        'form': form,
-        'prediction': prediction  # Passa a predição para o template
-    })
-
-def add_patient_info(request, paciente_id):
-    paciente = Patient.objects.get(id=paciente_id)
-    
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-
-        # Cria e salva as informações adicionais
-        PatientInfo.objects.create(patient=paciente, title=title, description=description)
-        
-        # Redireciona para a página de detalhes do paciente
-        return redirect('accounts:medical_images', paciente_id=paciente.id)
-    
-    return render(request, 'accounts/add_patient_info.html', {'paciente': paciente})
-
-
-@csrf_exempt
 def delete_image(request, image_id):
     if request.method == 'DELETE':
         try:
@@ -203,56 +190,15 @@ def delete_image(request, image_id):
             return JsonResponse({'error': 'Image not found.'}, status=404)
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-@csrf_exempt
-def delete_patient_info(request, info_id):
-    if request.method == 'DELETE':
-        try:
-            info = PatientInfo.objects.get(id=info_id)
-            info.delete()
-            return JsonResponse({'message': 'Information deleted successfully.'}, status=200)
-        except PatientInfo.DoesNotExist:
-            return JsonResponse({'error': 'Information not found.'}, status=404)
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+label_map = {0: 'covid', 1: 'pneumonia', 2: 'normal'}
 
-# Carregar o modelo treinado
-model_path = "/nas-ctm01/datasets/public/MEDICAL/mrsilvares/results/weights/OpenCVXRayNN_best.pth"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = OpenCVXRayNN()
-model.load_state_dict(torch.load(model_path, map_location=device))
-model.eval()
+def run_model(request, image_id):
+    image = get_object_or_404(MedicalImage, id=image_id)
+    image_path = image.image.path  
+    result = predict_xray(image_path)  # Supondo que retorne 0, 1 ou 2
 
-# Transformações para pré-processamento da imagem
-transform = transforms.Compose([
-    transforms.Resize((64, 64)),
-    transforms.ToTensor(),
-])
+    # Converte o número para texto
+    result_label = label_map[result]
 
-def predict_image(image_path):
-    """Processa a imagem e faz a predição usando o modelo treinado."""
-    image = Image.open(image_path).convert("RGB")
-    image = transform(image).unsqueeze(0).to(device)
-
-    with torch.no_grad():
-        output = model(image)
-        predicted_class = torch.argmax(output, dim=1).item()
-
-    # Mapear a predição para uma classe interpretável
-    classes = {0: "Normal", 1: "Pneumonia", 2: "Câncer"}
-    return classes.get(predicted_class, "Indeterminado")
-
-def upload_image(request):
-    if request.method == "POST":
-        form = MedicalImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            image_instance = form.save()
-            image_path = image_instance.image.path
-
-            # Chamar a função de predição
-            diagnosis = predict_image(image_path)
-            image_instance.diagnosis = diagnosis
-            image_instance.save()
-
-            return JsonResponse({"diagnosis": diagnosis, "image_url": image_instance.image.url})
-
-    return JsonResponse({"error": "Erro no upload da imagem."}, status=400)
+    return JsonResponse({"prediction": result_label})
