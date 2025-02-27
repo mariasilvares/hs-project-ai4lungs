@@ -159,7 +159,7 @@ if __name__ == "__main__":
     if DATA_AUGMENTATION:
         # Train
         train_transforms = transforms.Compose([
-            transforms.Resize((64, 64)),  
+            transforms.Resize((args.height, args.width)),  
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(10),  
             transforms.ToTensor(),  
@@ -168,21 +168,21 @@ if __name__ == "__main__":
 
         # Validation
         val_transforms = transforms.Compose([
-            transforms.Resize((64, 64)),  
+            transforms.Resize((args.height, args.width)),  
             transforms.ToTensor(),
             transforms.Normalize(mean=MEAN, std=STD), 
         ])
     else:
         # Train
         train_transforms = transforms.Compose([
-            transforms.Resize((64, 64)), 
+            transforms.Resize((args.height, args.width)), 
             transforms.ToTensor(),  
             transforms.Normalize(mean=MEAN, std=STD)
         ])
 
         # Validation
         val_transforms = transforms.Compose([
-            transforms.Resize((64, 64)),  
+            transforms.Resize((args.height, args.width)),  
             transforms.ToTensor(),
             transforms.Normalize(mean=MEAN, std=STD)
         ]) 

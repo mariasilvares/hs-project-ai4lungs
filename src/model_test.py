@@ -51,7 +51,11 @@ def main():
     
     # Caminhos para os pesos e modelo a carregar
     weights_dir = args.weights_dir
-    model_path = os.path.join(weights_dir, f"{args.model_name.lower()}_val_{args.dataset_name.lower()}.pt")
+
+    if args.data_augmentation:
+        model_path = os.path.join(weights_dir, f"{args.model_name.lower()}_val_{args.dataset_name.lower()}_da.pt")
+    else:
+        model_path = os.path.join(weights_dir, f"{args.model_name.lower()}_val_{args.dataset_name.lower()}.pt")
     
     # Inicializa o modelo conforme o argumento
     if args.model_name == "ChestXRayNN":
@@ -69,6 +73,7 @@ def main():
         transforms.ToTensor(),
         transforms.Normalize(mean=MEAN, std=STD)
     ])
+
     
     # Inicializa o Dataset de Teste
     if args.dataset_name.lower() == "chestxrayabnormalities":

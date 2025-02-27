@@ -159,46 +159,53 @@ def delete_patient_info(request, info_id):
 
 
 def upload_image(request, paciente_id):
-    # Recupera o paciente com o ID fornecido
     paciente = get_object_or_404(Patient, id=paciente_id)
-
+    
     if request.method == 'POST' and 'image' in request.FILES:
         uploaded_file = request.FILES['image']
-        MedicalImage.objects.create(patient=paciente, image=uploaded_file)
-
+        new_image = MedicalImage.objects.create(patient=paciente, image=uploaded_file)
+        
         # Registrar a atividade de upload
-        activity = Activity.objects.create(
+        Activity.objects.create(
             user=request.user,
-            action=f"Upload of {paciente.name}`s X-Ray",
+            action=f"Upload of {paciente.name}'s X-Ray",
         )
-
-        # Mensagem de sucesso
+        
         messages.success(request, 'Image uploaded with success!')
-
-    # Obtém todas as imagens para o paciente
+        
+        # Se a requisição for AJAX, retorna os dados da imagem em JSON
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            data = {
+                'id': new_image.id,
+                'image_url': new_image.image.url,
+                # Caso a imagem possua uma descrição, caso contrário, retorna uma string vazia
+                'description': new_image.description if hasattr(new_image, 'description') else ""
+            }
+            return JsonResponse(data)
+    
     images = MedicalImage.objects.filter(patient=paciente)
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
 
 
-def delete_image(request, image_id):
-    if request.method == 'DELETE':
-        try:
-            image = MedicalImage.objects.get(id=image_id)
-            image.delete()
-            return JsonResponse({'message': 'Image deleted successfully.'}, status=200)
-        except MedicalImage.DoesNotExist:
-            return JsonResponse({'error': 'Image not found.'}, status=404)
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
 
 label_map = {0: 'covid', 1: 'pneumonia', 2: 'normal'}
+
+
+def delete_image(request, image_id):
+    try:
+        image = MedicalImage.objects.get(id=image_id)
+        image.delete()
+        return JsonResponse({'message': 'Image deleted successfully.'}, status=200)
+    except MedicalImage.DoesNotExist:
+        return JsonResponse({'error': 'Image not found.'}, status=404)
+
 
 def run_model(request, image_id):
     image = get_object_or_404(MedicalImage, id=image_id)
     image_path = image.image.path  
     result = predict_xray(image_path)  # Retorna 0, 1 ou 2
-
-    # Converte o número para texto
+    
+    label_map = {0: 'covid', 1: 'pneumonia', 2: 'normal'}
     result_label = label_map[result]
-
+    
     return JsonResponse({"prediction": result_label})

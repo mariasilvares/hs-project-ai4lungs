@@ -94,7 +94,7 @@
         <p style="font-size: 16px; color: #c4bebe; margin-bottom: 40px; max-width: 500px; margin: 0 auto;">Upload an X-Ray for analysis. The system uses AI to detect possible signs of cancer, helping with the diagnosis.</p>
 
         <div class="upload-container" style="background-color: #464444; border-radius: 10px; padding: 30px; width: 100%; max-width: 450px; margin: 0 auto;">
-            <form method="post" enctype="multipart/form-data" action="{% url 'accounts:upload_image' paciente.id %}">
+            <form id="upload-form" method="post" enctype="multipart/form-data" action="{% url 'accounts:upload_image' paciente.id %}">
                 {% csrf_token %}
                 <div class="upload-box" id="upload-box" style="border: 2px dashed  rgb(204, 131, 113); padding: 20px; text-align: center; position: relative; border-radius: 10px; background-color: #ebe5e5; cursor: pointer;">
                     <span id="upload-instruction" style="font-size: 14px; color:  rgb(204, 131, 113);">Drag your X-Ray here or click to select</span>
@@ -127,8 +127,8 @@
                 <div id="deleteModal-{{ image.id }}" class="modal" style="display:none;">
                     <div class="modal-content">
                         <h2 style="color:#000;">Are you sure you want to delete this X-Ray?</h2>
-                        <button class="button danger" onclick="deleteImage('{{ image.id }}')">Yes, Delete</button>
-                        <button class="button" onclick="cancelDelete('{{ image.id }}')">Cancel</button>
+                        <button class="button danger">Yes, Delete</button>
+                        <button class="button">Cancel</button>
                     </div>
                 </div>
                 
@@ -136,14 +136,12 @@
                 <div class="diagnostic" style="padding: 10px 15px; background-color: #464444; border-top: 1px solid #464444; border-radius: 0 0 10px 10px;">
                     <p style="font-size: 14px; color: #c4bebe;">
                         <strong>Diagnosis:</strong> 
-                        <span class="diagnostic-result" style="display: none; color: #8f3b37; font-weight: 700;"></span>
+                        <span class="diagnostic-result" style="display: none; color: #8f3b37; font-weight: 700;">
+                            {% comment %} Para imagens já existentes, o diagnóstico pode não estar disponível {% endcomment %}
+                        </span>
                     </p>
                     <button type="button" onclick="toggleDiagnostic(this)" style="background-color:  rgb(204, 131, 113); color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;">
                         See Diagnosis
-                    </button>
-                    <!-- Botão Run Model -->
-                    <button type="button" class="run-model" data-image-id="{{ image.id }}" style="background-color: rgb(204, 131, 113); color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; margin-top: 5px;">
-                        Run Model
                     </button>
                 </div>
             </div>
@@ -176,22 +174,6 @@
 </div>
 
 <script>
-// Adiciona event listener para todos os botões "Run Model"
-document.querySelectorAll(".run-model").forEach(function(button) {
-    button.addEventListener("click", function() {
-        var imageId = this.getAttribute("data-image-id");
-        // Localiza o span de diagnóstico dentro do mesmo bloco "diagnostic"
-        var diagnosticResultSpan = this.parentElement.querySelector(".diagnostic-result");
-        fetch(`/accounts/run_model/${imageId}`)
-            .then(response => response.json())
-            .then(data => {
-                diagnosticResultSpan.textContent = "Previsão: " + data.prediction;
-                diagnosticResultSpan.style.display = "inline";
-            })
-            .catch(error => console.error("Erro ao executar o modelo:", error));
-    });
-});
-
 function toggleForm() {
     const form = document.getElementById("add-info-form");
     const button = document.getElementById("add-info-btn");
@@ -219,7 +201,49 @@ function previewImage(event) {
 }
 
 function showDeleteModal(imageId) {
-    document.getElementById(`deleteModal-${imageId}`).style.display = 'flex';
+    // Exibe o modal de confirmação
+    const modal = document.getElementById(`deleteModal-${imageId}`);
+    modal.style.display = 'flex';
+
+    // Adiciona o event listener para o botão de confirmação dentro do modal
+    const confirmButton = modal.querySelector('.button.danger');
+    confirmButton.onclick = function() {
+        deleteImage(imageId);
+        modal.style.display = 'none'; // Fecha o modal após a ação
+    };
+
+    // Adiciona o event listener para o botão de cancelamento dentro do modal
+    const cancelButton = modal.querySelector('.button:not(.danger)');
+    cancelButton.onclick = function() {
+        modal.style.display = 'none'; // Apenas fecha o modal
+    };
+}
+
+function deleteImage(imageId) {
+    fetch(`/accounts/delete_image/${imageId}/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            // Remove o card da imagem do DOM
+            const imageCard = document.getElementById(`image-card-${imageId}`);
+            if (imageCard) {
+                imageCard.remove();
+            }
+            alert('Image deleted successfully!');
+        } else {
+            return response.json().then(data => {
+                alert(data.error || 'Error deleting the image. Please try again.');
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error deleting the image.');
+    });
 }
 
 function cancelDelete(imageId) {
@@ -230,7 +254,6 @@ function getCSRFToken() {
     return document.querySelector('[name=csrfmiddlewaretoken]').value;
 }
 
-// Função para exibir/ocultar o diagnóstico
 function toggleDiagnostic(button) {
     const diagnosticResult = button.parentElement.querySelector(".diagnostic-result");
     if (diagnosticResult.style.display === "none") {
@@ -242,51 +265,101 @@ function toggleDiagnostic(button) {
     }
 }
 
-// Exclusão de imagens
-function deleteImage(imageId) {
-    const csrfToken = getCSRFToken();
-    fetch(`/accounts/delete_image/${imageId}/`, {
-        method: 'DELETE',
+// Intercepta o envio do formulário de upload para enviar a imagem e rodar o modelo
+document.getElementById("upload-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
         headers: {
-            'X-CSRFToken': csrfToken,
+            'X-CSRFToken': getCSRFToken(),
+            'X-Requested-With': 'XMLHttpRequest'
         },
     })
-    .then((response) => {
-        if (response.ok) {
-            document.getElementById(`image-card-${imageId}`).remove();
-            alert('Image deleted successfully!');
+    .then(response => response.json())
+    .then(data => {
+        // Espera-se que 'data' contenha: id, image_url, description
+        const gallery = document.querySelector(".image-gallery");
+        const card = document.createElement("div");
+        card.classList.add("image-card");
+        card.id = "image-card-" + data.id;
+        card.style.cssText = "text-align: center; width: 200px; position: relative; border-radius: 10px; overflow: hidden; background-color: #464444;";
+        
+        // Cria o elemento da imagem
+        const img = document.createElement("img");
+        img.src = data.image_url;
+        img.alt = data.description || "";
+        img.classList.add("image-thumbnail");
+        img.style.cssText = "width: 100%; height: 150px; object-fit: cover;";
+        card.appendChild(img);
+        
+        // Adiciona a descrição
+        const p = document.createElement("p");
+        p.style.cssText = "font-size: 14px; color: #c4bebe; margin: 10px 0;";
+        p.textContent = data.description || "";
+        card.appendChild(p);
+        
+        // Botão de remoção
+        const removeSpan = document.createElement("span");
+        removeSpan.classList.add("remove-image");
+        removeSpan.textContent = "X";
+        removeSpan.style.cssText = "position: absolute; top: 10px; right: 10px; cursor: pointer; background-color: #8f3b37; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 18px; font-size: 14px;";
+        removeSpan.onclick = function() {
+            showDeleteModal(data.id);
+        };
+        card.appendChild(removeSpan);
+        
+        // Seção de diagnóstico
+        const diagnosticDiv = document.createElement("div");
+        diagnosticDiv.classList.add("diagnostic");
+        diagnosticDiv.style.cssText = "padding: 10px 15px; background-color: #464444; border-top: 1px solid #464444; border-radius: 0 0 10px 10px;";
+        const pDiag = document.createElement("p");
+        pDiag.style.cssText = "font-size: 14px; color: #c4bebe;";
+        pDiag.innerHTML = "<strong>Diagnosis:</strong> <span class='diagnostic-result' style='display: none; color: #8f3b37; font-weight: 700;'></span>";
+        diagnosticDiv.appendChild(pDiag);
+        const diagButton = document.createElement("button");
+        diagButton.type = "button";
+        diagButton.textContent = "See Diagnosis";
+        diagButton.style.cssText = "background-color:  rgb(204, 131, 113); color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;";
+        diagButton.onclick = function() {
+            toggleDiagnostic(diagButton);
+        };
+        diagnosticDiv.appendChild(diagButton);
+        card.appendChild(diagnosticDiv);
+        
+        if (gallery) {
+            gallery.appendChild(card);
         } else {
-            alert('Error deleting the image. Please try again.');
+            const newGallery = document.createElement("div");
+            newGallery.classList.add("image-gallery");
+            newGallery.style.cssText = "display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;";
+            newGallery.appendChild(card);
+            const uploadedImagesDiv = document.querySelector(".uploaded-images");
+            uploadedImagesDiv.innerHTML = "";
+            uploadedImagesDiv.appendChild(newGallery);
         }
+        
+        // Limpa o input e o preview
+        document.getElementById("upload-image").value = "";
+        document.getElementById("image-preview").innerHTML = "";
+        
+        // Executa o modelo automaticamente para a nova imagem
+        const diagnosticResultSpan = card.querySelector(".diagnostic-result");
+        fetch(`/accounts/run_model/${data.id}`)
+            .then(response => response.json())
+            .then(modelData => {
+                diagnosticResultSpan.textContent = "Previsão: " + modelData.prediction;
+                // O resultado permanece oculto até o clique em "See Diagnosis"
+            })
+            .catch(error => console.error("Erro ao executar o modelo:", error));
     })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('Error deleting the image.');
+    .catch(error => {
+        console.error("Erro ao enviar a imagem:", error);
+        alert("Error uploading image. Please try again.");
     });
-}
-
-// Exclusão de informações
-function removeInfo(infoId) {
-    const csrfToken = getCSRFToken();
-    fetch(`/accounts/delete_patient_info/${infoId}/`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRFToken': csrfToken,
-        },
-    })
-    .then((response) => {
-        if (response.ok) {
-            document.getElementById(`info-item-${infoId}`).remove();
-            alert('Information deleted successfully!');
-        } else {
-            alert('Error deleting the information. Please try again.');
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('Error deleting the information.');
-    });
-}
+});
 </script>
 
 <style>
