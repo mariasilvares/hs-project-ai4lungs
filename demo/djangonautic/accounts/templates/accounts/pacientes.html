@@ -1,7 +1,7 @@
 {% extends 'base_layout.html' %}
 
 {% block content %}
-<div class="container" style="margin-top: 0px; background-color: #424040; padding: 2px 0;">
+<div class="container" style="margin-top: 0px; background-color: #1d1e1f; padding: 2px 0;">
     <h1 class="text-center" style="margin-bottom: 30px; font-size: 40px; color: #ffffff;">Patients Management</h1>
 
     <!-- Exibe a mensagem de sucesso, se houver -->
@@ -31,7 +31,7 @@
             <div style="line-height: 1.8; color: #c4bebe;">
                 {{ form.as_p }}
             </div>
-            <button type="submit" style="margin-top: 20px; padding: 12px 30px; background-color: rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
+            <button type="submit" style="margin-top: 20px; padding: 12px 30px; background-color:#6f8eaf; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
                 Add Patient
             </button>
         </form>
@@ -117,5 +117,18 @@
         max-width: 400px;
         width: 100%;
     }
+
+    .btn {
+    background: linear-gradient(to right, #6f8eaf, #aeb4c7); 
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: linear-gradient(to right, #8b9ba7, #6f8eaf); /* Efeito de hover */
+}
 </style>
 {% endblock %}

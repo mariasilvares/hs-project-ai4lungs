@@ -187,17 +187,15 @@ def upload_image(request, paciente_id):
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
 
 
-
-label_map = {0: 'covid', 1: 'pneumonia', 2: 'normal'}
-
-
 def delete_image(request, image_id):
-    try:
-        image = MedicalImage.objects.get(id=image_id)
-        image.delete()
-        return JsonResponse({'message': 'Image deleted successfully.'}, status=200)
-    except MedicalImage.DoesNotExist:
-        return JsonResponse({'error': 'Image not found.'}, status=404)
+    if request.method == 'DELETE':
+        try:
+            image = MedicalImage.objects.get(id=image_id)
+            image.delete()
+            return JsonResponse({'message': 'Image deleted successfully.'}, status=200)
+        except MedicalImage.DoesNotExist:
+            return JsonResponse({'error': 'Image not found.'}, status=404)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 def run_model(request, image_id):

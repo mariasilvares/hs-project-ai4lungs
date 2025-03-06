@@ -10,19 +10,19 @@
 <div class='wrapper'>
     <!-- base_layout.html -->
     <header>
-        <h1><a href="{% url 'home' %}" style="font-weight: 700;">AI4Lungs</a></h1>
+        <h1><a href="{% url 'home' %}" style="font-weight: 400;">AI4Lungs</a></h1>
         <nav>
             <ul>
-                <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="font-weight: 700;">Home</a></li>
+                <li><a href="{% url 'home' %}" class="{% if request.path == '/' %}active{% endif %}" style="font-weight: 400;">Home</a></li>
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}" style="font-weight: 700;">Profile</a></li>
-                    <li><a href="{% url 'accounts:pacientes' %}" class="{% if request.path == '/accounts/pacientes/' %}active{% endif %}" style="font-weight: 700;">Patients</a></li>
+                    <li><a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}" style="font-weight: 400;">Profile</a></li>
+                    <li><a href="{% url 'accounts:pacientes' %}" class="{% if request.path == '/accounts/pacientes/' %}active{% endif %}" style="font-weight: 400;">Patients</a></li>
                     <li>
-                        <button class="logout-button" style="font-weight: 700;">Logout</button>
+                        <button class="logout-button" style="font-weight: 400;">Logout</button>
                     </li>
                 {% else %}
-                    <li><a href='{% url "accounts:login" %}' class="{% if request.path == '/accounts/login/' %}active{% endif %}" style="font-weight: 700;">Login</a></li>
-                    <li><a href='{% url "accounts:signup" %}' class="{% if request.path == '/accounts/signup/' %}active{% endif %}" style="font-weight: 700;">Signup</a></li>
+                    <li><a href='{% url "accounts:login" %}' class="{% if request.path == '/accounts/login/' %}active{% endif %}" style="font-weight: 400;">Login</a></li>
+                    <li><a href='{% url "accounts:signup" %}' class="{% if request.path == '/accounts/signup/' %}active{% endif %}" style="font-weight: 400;">Signup</a></li>
                 {% endif %}
             </ul>
         </nav>
@@ -103,6 +103,18 @@
         background-color: #817d7d;
         color: white;
     }
+    .btn {
+    background: linear-gradient(to right, #6f8eaf, #aeb4c7); 
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: linear-gradient(to right, #8b9ba7, #6f8eaf); /* Efeito de hover */
+}
 </style>
 </body>
 </html>

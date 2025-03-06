@@ -1,7 +1,13 @@
 body{
-    background-color: #424040;
-    /* background-image: url(pulmão.png);
-    background-repeat: repeat no-repeat; */
+    background-color: #000000;
+    background-image: url(lungs-dark-background.jpg);
+    background-repeat: repeat no-repeat;
+    color: #fff;
+}
+
+header {
+
+    padding: 10px 0;
     color: #fff;
 }
 
@@ -28,12 +34,6 @@ div.wrapper h1{
     text-align: center;
     margin: 100px auto;
     font-size: 2.4em;
-}
-
-header{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 20px 0;
 }
 
 nav{
@@ -105,6 +105,19 @@ a.highlight{
     margin: 10px 0;
 }
 
+.btn {
+    background: linear-gradient(to right, #6f8eaf, #aeb4c7); 
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: linear-gradient(to right, #8b9ba7, #6f8eaf); /* Efeito de hover */
+}
+
 /* Estilos de responsividade */
 @media (max-width: 768px) {
     .profile-container {
@@ -127,7 +140,7 @@ a.highlight{
 
 /* Estilo para links ativos */
 a.active {
-    color: rgb(204, 131, 113); /* texto vermelho */
+    color: #7b99b9; /* texto vermelho */
     font-weight: bold; /* texto em negrito para destaque */
 }
 
@@ -152,7 +165,7 @@ a.active {
     padding: 20px;
     background-color: #f9f9f9;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px #6f8eaf;
 }
 
 .form-group {
@@ -223,12 +236,12 @@ a.active {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
     transition: background-color 0.3s ease;
 }
 
 .patient-card:hover {
-    background-color: #444; /* Cor de hover para destaque */
+    background-color: #262627; /* Cor de hover para destaque */
 }
 
 .patient-info {
