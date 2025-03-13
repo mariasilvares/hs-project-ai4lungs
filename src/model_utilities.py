@@ -5,14 +5,9 @@ from typing import Type, Any, Callable, Union, List, Optional
 import torch
 from torch import Tensor
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.hub import load_state_dict_from_url
 import torchvision
-
-
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 
 
@@ -120,6 +115,77 @@ class ChestXRayNN(nn.Module):
         return x
 
 
+# Model: DenseNet121 for OpenCVXRayNN
+# DenseNet121 para ChestXRayNN
+class DenseNet121ChestXRayNN(torch.nn.Module):
+    def __init__(self, channels=3, height=64, width=64, nr_classes=3):
+        super(DenseNet121ChestXRayNN, self).__init__()
+
+        # Backbone para extrair características
+        self.densenet121 = torchvision.models.densenet121(pretrained=True).features
+
+        # Camadas FC
+        # Calcula in_features
+        _in_features = torch.rand(1, channels, height, width)
+        _in_features = self.densenet121(_in_features)
+        _in_features = _in_features.size(0) * _in_features.size(1) * _in_features.size(2) * _in_features.size(3)
+
+        # Camada FC1 para classificação
+        self.fc1 = torch.nn.Linear(in_features=_in_features, out_features=512)
+        self.fc2 = torch.nn.Linear(512, nr_classes)
+
+    def forward(self, x):
+        x = self.densenet121(x)
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+
+# DenseNet121 para OpenCVXRayNN
+class DenseNet121OpenCVXRayNN(torch.nn.Module):
+    def __init__(self, channels=3, height=64, width=64, nr_classes=2):
+        super(DenseNet121OpenCVXRayNN, self).__init__()
+
+        # Backbone para extrair características
+        self.densenet121 = torchvision.models.densenet121(pretrained=True).features
+
+        # Camadas FC
+        # Calcula in_features
+        _in_features = torch.rand(1, channels, height, width)
+        _in_features = self.densenet121(_in_features)
+        _in_features = _in_features.size(0) * _in_features.size(1) * _in_features.size(2) * _in_features.size(3)
+
+        # Camada FC1 para classificação
+        self.fc1 = torch.nn.Linear(in_features=_in_features, out_features=512)
+        self.fc2 = torch.nn.Linear(512, nr_classes)
+
+    def forward(self, x):
+        x = self.densenet121(x)
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+
+if __name__ == "__main__":
+    # Teste do modelo ChestXRayNN com DenseNet121
+    model = DenseNet121ChestXRayNN(channels=3, height=64, width=64, nr_classes=3)
+    print(model)
+
+    # Testa o modelo com um Tensor aleatório
+    test_input = torch.randn(1, 3, 64, 64)
+    test_output = model(test_input)
+    print(test_output.shape)
+
+    # Teste do modelo OpenCVXRayNN com DenseNet121
+    model = DenseNet121OpenCVXRayNN(channels=3, height=64, width=64, nr_classes=3)
+    print(model)
+
+    # Testa o modelo com um Tensor aleatório
+    test_input = torch.randn(1, 3, 64, 64)
+    test_output = model(test_input)
+    print(test_output.shape)
 
 if __name__ == "__main__":
 

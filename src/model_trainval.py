@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 
 # PyTorch Imports
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
@@ -17,7 +18,7 @@ from torchvision import transforms
 import wandb
 
 # Project Imports
-from model_utilities import OpenCVXRayNN, ChestXRayNN
+from model_utilities import OpenCVXRayNN, ChestXRayNN, DenseNet121ChestXRayNN, DenseNet121OpenCVXRayNN
 from dataset_utilities import OpenCVXray, ChestXRayAbnormalities
 
 # Function: See the seed for reproducibility purposes
@@ -53,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('--weights_dir', type=str, help='Directory for saving model weights.')  
     parser.add_argument('--history_dir', type=str, help='Directory for saving training history.')  
     parser.add_argument("--data_augmentation", action="store_true", help="Enable or disable data augmentation")
-    parser.add_argument('--model_name', type=str, choices=['OpenCVXRayNN', 'ChestXRayNN'], required=True, help='Name of the model to be used') 
+    parser.add_argument('--model_name', type=str, choices=['OpenCVXRayNN', 'ChestXRayNN', 'DenseNet121ChestXRayNN', 'DenseNet121OpenCVXRayNN'], required=True, help='Name of the model to be used') 
     parser.add_argument('--dataset_name', type=str, required=True, help='The dataset for the experiments.')  
     parser.add_argument('--channels', type=int, default=3, help="Número de canais da imagem.")  
     parser.add_argument('--height', type=int, default=64, help="Altura da imagem de entrada.") 
@@ -118,6 +119,7 @@ if __name__ == "__main__":
             nr_classes=nr_classes
         )
         print("Modelo OpenCVXRayNN inicializado.")
+
     elif model_name == "ChestXRayNN":
         model = ChestXRayNN(
             channels=channels,
@@ -126,6 +128,24 @@ if __name__ == "__main__":
             nr_classes=nr_classes
         )
         print("Modelo ChestXRayNN inicializado.")
+
+    elif model_name == "DenseNet121ChestXRayNN":
+        model = DenseNet121ChestXRayNN(
+            channels=channels,
+            height=height,
+            width=width,
+            nr_classes=nr_classes
+        )
+        print("Modelo DenseNet121ChestXRayNN inicializado.")
+
+    elif model_name == "DenseNet121OpenCVXRayNN":
+        model = DenseNet121OpenCVXRayNN(
+            channels=channels,
+            height=height,
+            width=width,
+            nr_classes=nr_classes
+        )
+        print("Modelo DenseNet121OpenCVXRayNN inicializado.")
     else:
         raise ValueError(f"Modelo {model_name} não reconhecido!")
 
