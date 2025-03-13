@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -49,9 +50,10 @@ class MedicalImage(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='medical_images/')
     description = models.TextField()
+    uploaded_at = models.DateTimeField(default=timezone.now)  # Define um valor padrão
 
     def __str__(self):
-                return f"Image by {self.paciente.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
+        return f"Image by {self.patient.name} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
 
 class PatientInfo(models.Model):
     patient = models.ForeignKey(Patient, related_name="patientinfo_set", on_delete=models.CASCADE)
