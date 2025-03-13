@@ -3,37 +3,32 @@
 {% load static %}
 
 {% block content %}
-<div class="edit-profile-container" style="margin-top: 20px; background-color: #383737; padding: 20px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); max-width: 800px; margin-left: auto; margin-right: auto;">
-    <h2 style="text-align: center; font-size: 28px; color: #ffffff; margin-bottom: 20px;">Edit profile</h2>
-
-    <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+<div class="container">
+    <h2 class="page-title">Editar Perfil</h2>
+    <form method="post" enctype="multipart/form-data" class="profile-form">
         {% csrf_token %}
-        
-        <div>
-            <label for="id_username" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Username:</label>
+        <div class="form-group">
+            <label for="id_username">Nome de Usuário:</label>
             {{ user_form.username }}
         </div>
-
-        <div>
-            <label for="id_email" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Email:</label>
+        <div class="form-group">
+            <label for="id_email">Email:</label>
             {{ user_form.email }}
         </div>
-
-        <div>
-            <label for="id_profile_picture" style="color: #c4bebe; font-size: 16px; display: block; margin-bottom: 5px;">Profile picture:</label>
-            <div style="margin-bottom: 10px;">
+        <div class="form-group">
+            <label for="id_profile_picture">Foto de Perfil:</label>
+            <div class="profile-picture-preview">
                 {% if user.userprofile.profile_picture %}
-                    <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de Perfil" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid rgb(204, 131, 113);">
+                    <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de Perfil">
                 {% else %}
-                    <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid rgb(204, 131, 113);">
+                    <img src="{% static 'default-profile.png' %}" alt="Imagem padrão">
                 {% endif %}
             </div>
             {{ profile_form.profile_picture }}
         </div>
-
         {% if user_form.errors %}
-            <div class="form-errors" style="background-color: #8f3b37; padding: 10px; border-radius: 5px; color: white; font-size: 14px;">
-                <ul style="list-style: none; padding: 0;">
+            <div class="form-errors">
+                <ul>
                     {% for field in user_form %}
                         {% for error in field.errors %}
                             <li><strong>{{ field.name|capfirst }}:</strong> {{ error }}</li>
@@ -42,16 +37,196 @@
                 </ul>
             </div>
         {% endif %}
-
-        <button type="submit" style="padding: 12px 30px; background-color: rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
-            Save Changes
-        </button>
-    </form>
-
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="{% url 'profile' %}" style="padding: 10px 20px; background-color: #8f3b37; color: white; text-decoration: none; border-radius: 20px; font-size: 14px; transition: background-color 0.3s ease;">
-            Back to Profile Page
-        </a>
+        <button type="submit" class="btn btn-primary btn-lg w-100" style="margin-top: 20px;">
+            Salvar Alterações
+        </button>        
+    <div class="back-link">
+        <a href="{% url 'profile' %}">Voltar à Página de Perfil</a>
     </div>
 </div>
+
+<script>
+    document.querySelector('.profile-form').addEventListener('submit', function(event) {
+        var emailField = document.getElementById('id_email');
+        if (!emailField.value.includes('@')) {
+            alert('Por favor, insira um email válido.');
+            event.preventDefault(); // Impede o envio do formulário
+        }
+    });
+</script>
+
+<style>
+/* Caixa principal */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #1e1e1e; /* Fundo escuro */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 0px; /* Sem cantos arredondados */
+}
+
+/* Título da página */
+.page-title {
+    text-align: center;
+    font-size: 28px;
+    color: #ffffff; /* Título branco */
+    margin-bottom: 20px;
+}
+
+/* Estilos do formulário */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-size: 16px;
+    color: #c4c4c4; /* Rótulos em cinza claro */
+}
+
+input, button {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Estilo para o campo de email */
+input:focus, button:focus {
+    outline: none;
+    border-color: #8f3b37;
+}
+
+/* Visualização da foto de perfil */
+.profile-picture-preview {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.profile-picture-preview img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #627d9b;
+}
+
+/* Estilos para mensagens de erro */
+.form-errors {
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+    color: #721c24;
+    font-size: 14px;
+}
+
+.form-errors ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* Estilos do botão de envio */
+.btn-submit {
+    background-color: #8f3b37;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: center;
+}
+
+.btn-submit:hover {
+    background-color: #6f2a1f;
+}
+
+/* Estilos do link de retorno */
+.back-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.back-link a {
+    color: #8f3b37;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.back-link a:hover {
+    color: #3f5b7a;
+}
+
+/* Estilo personalizado para o botão 'Salvar Alterações' */
+.btn-primary {
+    background-color: #627d9b; /* Azul padrão do Bootstrap */
+    border-color: #627d9b;
+}
+
+.btn-primary:hover {
+    background-color: #44566b; /* Azul mais escuro ao passar o mouse */
+    border-color: #627d9b;
+}
+
+.btn-primary:focus, .btn-primary.focus {
+    box-shadow: 0 0 0 0.2rem #627d9b;
+}
+
+/* Estilos para a página */
+body {
+    background-color: #121212; /* Cor de fundo escura */
+    color: #e0e0e0; /* Texto claro para contraste */
+}
+
+.container {
+    background-color: #1e1e1e; /* Fundo escuro para o contêiner */
+    padding: 20px;
+    border-radius: 0px; /* Sem bordas arredondadas */
+}
+
+/* Estilo para o campo de formulário */
+.form-group label {
+    color: #b0b0b0; /* Rótulos de formulário em cinza claro */
+}
+
+.form-group input, .form-group textarea {
+    background-color: #333333; /* Fundo escuro para campos de entrada */
+    color: #e0e0e0; /* Texto claro nos campos */
+    border: 1px solid #444444;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    border-color: #627d9b; /* Azul para o foco nos campos */
+    outline: none;
+}
+
+/* Mensagem de erro */
+.form-errors {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Link de voltar */
+.back-link a {
+    color: #627d9b; /* Cor do link igual ao botão */
+    text-decoration: none;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+</style>
+
 {% endblock %}

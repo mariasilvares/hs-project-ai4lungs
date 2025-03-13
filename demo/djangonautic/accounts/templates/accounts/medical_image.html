@@ -1,165 +1,140 @@
 {% extends 'base_layout.html' %}
 
 {% block content %}
-<div class="container" style="margin-top: 20px; font-family: 'Arial', sans-serif; background-color: rgba(255, 255, 255, 0.2); padding: 2px 0;">
-
-    <!-- Exibe a mensagem de sucesso, se houver -->
+<div class="container main-container">
+  
+    <!-- Mensagens de Sucesso -->
     {% if messages %}
-    <ul class="messages" style="max-width: 600px; margin: 70px auto; list-style: none; padding: 0; text-align: center;">
+    <ul class="messages">
         {% for message in messages %}
-        <li class="message-item" style="background-color: rgb(204, 131, 113); color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">
-            {{ message }}
-        </li>
+        <li class="message-item">{{ message }}</li>
         {% endfor %}
     </ul>
     <script>
         setTimeout(function () {
-            const messageItems = document.querySelectorAll('.message-item');
-            messageItems.forEach(function (item) {
-                item.style.display = 'none';
-            });
+            document.querySelectorAll('.message-item').forEach(item => item.style.opacity = 0);
         }, 5000);
     </script>
     {% endif %}
 
-    <h1 class="text-center" style="margin-bottom: 50px; font-size: 40px; color: #ffffff;">Individual Patient Page</h1>
+    <!-- Título da Página -->
+    <h1 class="page-title">Individual Patient Page</h1>
 
-    <!-- Informações do Paciente -->
-    <div class="patient-info" style="margin-bottom: 60px;">
-        <div class="card" style="padding: 20px 30px; border-radius: 10px; background-color: #464444; max-width: 600px; margin: 0 auto;">
-            <div class="card-header" style="font-size: 22px; font-weight: 600; margin-bottom: 25px; color: #c4bebe;">
-                Informations
-            </div>
-            <div class="card-body" style="line-height: 2; font-size: 16px;">
-                <p><strong style="color: #c4bebe;">Patient name:</strong> <span style="color: #c4bebe;">{{ paciente.name }}</span></p>
-                <p><strong style="color: #c4bebe;">Patient number:</strong> <span style="color: #c4bebe;">{{ paciente.number }}</span></p>
+    <!--  INFORMAÇÕES DO PACIENTE-->
+    <section class="patient-info">
+        <div class="card patient-card">
+            <div class="card-header">Informations</div>
+            <div class="card-body">
+                <p><strong>Patient name:</strong> <span>{{ paciente.name }}</span></p>
+                <p><strong>Patient number:</strong> <span>{{ paciente.number }}</span></p>
 
-                <!-- Informações adicionais -->
+                <!-- Informações Adicionais -->
                 {% if paciente.patientinfo_set.exists %}
-                <div class="additional-infos" style="margin-top: 30px;">
-                    <h4 style="font-size: 22px; font-weight: 600; margin-bottom: 20px; color: #c4bebe;">Additional Information:</h4>
-                    <ul style="list-style: none; padding: 0;">
+                <div class="additional-infos">
+                    <h4>Additional Information:</h4>
+                    <ul class="info-list">
                         {% for info in paciente.patientinfo_set.all %}
-                        <li id="info-item-{{ info.id }}" style="color: #c4bebe; line-height: 1.7; font-size: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <li id="info-item-{{ info.id }}" class="info-item">
                             <div>
                                 <strong>{{ info.title }}:</strong> {{ info.description }}
                             </div>
-                            <button onclick="removeInfo('{{ info.id }}')" style="background-color: #8f3b37; color: white; border: none; border-radius: 10px; padding: 5px 15px; cursor: pointer;">
-                                Remove
-                            </button>
+                            <button onclick="removeInfo('{{ info.id }}')" class="btn remove-btn">Remove</button>
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
                 {% endif %}
 
-                <!-- Botão Add Information -->
-                <div id="add-info-btn-container" style="margin-top: 30px; text-align: center;">
-                    <button id="add-info-btn" onclick="toggleForm()" style="padding: 12px 30px; background-color:  rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
-                        Add Information
-                    </button>
+                <!-- Botão para Exibir Formulário de Adição -->
+                <div id="add-info-btn-container" class="add-info-btn-container">
+                    <button id="add-info-btn" onclick="toggleForm()" class="btn add-info-btn">Add Information</button>
                 </div>
 
-                <!-- Formulário para adicionar informações (inicialmente escondido) -->
-                <div id="add-info-form" style="display: none; margin-top: 40px;">
+                <!-- Formulário de Adição de Informações (inicialmente oculto) -->
+                <div id="add-info-form" class="add-info-form">
                     <form method="post" action="{% url 'accounts:add_patient_info' paciente.id %}">
                         {% csrf_token %}
-                        <div class="form-group" style="margin-bottom: 25px;">
-                            <label for="info-title" style="color: #c4bebe; font-size: 16px;">Title</label>
-                            <input type="text" id="info-title" name="title" class="form-control" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" required>
+                        <div class="form-group">
+                            <label for="info-title">Title</label>
+                            <input type="text" id="info-title" name="title" class="form-control" required>
                         </div>
-
-                        <div class="form-group" style="margin-bottom: 25px;">
-                            <label for="info-description" style="color: #c4bebe; font-size: 16px;">Description</label>
-                            <textarea id="info-description" name="description" rows="5" class="form-control" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;" required></textarea>
+                        <div class="form-group">
+                            <label for="info-description">Description</label>
+                            <textarea id="info-description" name="description" rows="5" class="form-control" required></textarea>
                         </div>
-
-                        <button type="submit" style="margin-top: 25px; padding: 12px 30px; background-color:  rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
-                            Save Information
-                        </button>
-
-                        <!-- Botão Cancel -->
-                        <button type="button" onclick="cancelForm()" style="margin-top: 25px; padding: 12px 30px; background-color: #8f3b37; color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease; margin-left: 15px;">
-                            Cancel
-                        </button>
+                        <div class="form-actions">
+                            <button type="submit" class="btn save-info-btn">Save Information</button>
+                            <button type="button" onclick="cancelForm()" class="btn cancel-info-btn">Cancel</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Upload da Radiografia -->
-    <div class="upload-section" style="margin-bottom: 80px; text-align: center;">
-        <h3 style="font-size: 24px; color: #383737; font-weight: 600; margin-bottom: 30px;">Upload X-Ray</h3>
-        <p style="font-size: 16px; color: #c4bebe; margin-bottom: 40px; max-width: 500px; margin: 0 auto;">Upload an X-Ray for analysis. The system uses AI to detect possible signs of cancer, helping with the diagnosis.</p>
-
-        <div class="upload-container" style="background-color: #464444; border-radius: 10px; padding: 30px; width: 100%; max-width: 450px; margin: 0 auto;">
+    <!--  UPLOAD DA RADIOGRAFIA-->
+    <section class="upload-section">
+        <h3 class="upload-title">Upload X-Ray</h3>
+        <p class="upload-description">
+            Upload an X-Ray for analysis. The system uses AI to detect possible signs of cancer, helping with the diagnosis.
+        </p>
+        <div class="upload-container">
             <form id="upload-form" method="post" enctype="multipart/form-data" action="{% url 'accounts:upload_image' paciente.id %}">
                 {% csrf_token %}
-                <div class="upload-box" id="upload-box" style="border: 2px dashed  rgb(204, 131, 113); padding: 20px; text-align: center; position: relative; border-radius: 10px; background-color: #ebe5e5; cursor: pointer;">
-                    <span id="upload-instruction" style="font-size: 14px; color:  rgb(204, 131, 113);">Drag your X-Ray here or click to select</span>
-                    <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; cursor: pointer;">
-                    <div id="image-preview" class="image-preview" style="margin-top: 20px;"></div>
+                <div class="upload-box" id="upload-box">
+                    <span id="upload-instruction">Drag your X-Ray here or click to select</span>
+                    <input id="upload-image" type="file" name="image" accept="image/*" onchange="previewImage(event)">
+                    <div id="image-preview" class="image-preview"></div>
                 </div>
-                <button type="submit" style="margin-top: 25px; padding: 12px 30px; background-color:  rgb(204, 131, 113); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">
-                    Send
-                </button>
+                <button type="submit" class="btn upload-btn">Send</button>
             </form>
         </div>
-    </div>
+    </section>
 
-    <!-- Imagens Carregadas -->
-    <div class="uploaded-images" style="margin-bottom: 100px; text-align: center;">
-        <h3 style="font-size: 24px; color: #383737; font-weight: 600; margin-bottom: 30px;">Uploaded X-Rays</h3>
-        {% if images %}
-        <div class="image-gallery" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-            {% for image in images %}
-            <div class="image-card" id="image-card-{{ image.id }}" style="text-align: center; width: 200px; position: relative; border-radius: 10px; overflow: hidden; background-color: #464444;">
-                <img src="{{ image.image.url }}" alt="{{ image.description }}" class="image-thumbnail" style="width: 100%; height: 150px; object-fit: cover;">
-                <p style="font-size: 14px; color: #c4bebe; margin: 10px 0;">{{ image.description }}</p>
-        
-                <!-- Botão X para remover a imagem -->
-                <span class="remove-image" onclick="showDeleteModal('{{ image.id }}')" style="position: absolute; top: 10px; right: 10px; cursor: pointer; background-color: #8f3b37; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 18px; font-size: 14px;">
-                    X
-                </span>
-                
-                <!-- Modal de Confirmação -->
-                <div id="deleteModal-{{ image.id }}" class="modal" style="display:none;">
-                    <div class="modal-content">
-                        <h2 style="color:#000;">Are you sure you want to delete this X-Ray?</h2>
-                        <button class="button danger" onclick="deleteImage('{{ image.id }}')">Yes, Delete</button>
-                        <button class="button" onclick="cancelDelete('{{ image.id }}')">Cancel</button>
-                    </div>
-                </div>
-                
-                <!-- Diagnóstico -->
-                <div class="diagnostic" style="padding: 10px 15px; background-color: #464444; border-top: 1px solid #464444; border-radius: 0 0 10px 10px;">
-                    <p style="font-size: 14px; color: #c4bebe;">
-                        <strong>Diagnosis:</strong> 
-                        <span class="diagnostic-result" style="display: none; color: #8f3b37; font-weight: 700;">
-                            {% comment %} Para imagens já existentes, o diagnóstico pode não estar disponível {% endcomment %}
-                        </span>
-                    </p>
-                    <button type="button" onclick="toggleDiagnostic(this)" style="background-color:  rgb(204, 131, 113); color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;">
-                        See Diagnosis
-                    </button>
+<!-- GALERIA DE IMAGENS -->
+<section class="uploaded-images">
+    <h3 class="gallery-title">Uploaded X-Rays</h3>
+    {% if images %}
+    <div class="image-gallery">
+        {% for image in images %}
+        <div class="image-card" id="image-card-{{ image.id }}">
+            <figure>
+                <img src="{{ image.image.url }}" alt="{{ image.description }}" class="image-thumbnail">
+                <figcaption class="image-description">{{ image.description }}</figcaption>
+            </figure>
+            <!-- Ações do Cartão -->
+            <div class="card-actions">
+                <button class="btn remove-btn" onclick="showDeleteModal('{{ image.id }}')">Remove</button>
+                <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this)">See Diagnosis</button>
+            </div>
+            <!-- Seção de Diagnóstico -->
+            <div class="diagnostic">
+                <p><strong>Diagnosis:</strong> <span class="diagnostic-result"></span></p>
+            </div>
+            <!-- Modal de Confirmação para Exclusão -->
+            <div id="deleteModal-{{ image.id }}" class="modal">
+                <div class="modal-content">
+                    <h2>Are you sure you want to delete this X-Ray?</h2>
+                    <button class="button danger" onclick="deleteImage('{{ image.id }}')">Yes, Delete</button>
+                    <button class="button" onclick="cancelDelete('{{ image.id }}')">Cancel</button>
                 </div>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-            <p style="font-size: 16px; color: #c4bebe; text-align: center;">No images uploaded for this patient</p>
-        {% endif %}
+        {% endfor %}
     </div>
+    {% else %}
+        <p class="no-images-msg">No images uploaded for this patient</p>
+    {% endif %}
+</section>
 
-    <!-- Histórico de Diagnósticos -->
-    <div class="diagnostic-history" style="margin-top: 40px; text-align: center;">
-        <h3 style="font-size: 24px; color: #413f3f; font-weight: 600; margin-bottom: 30px;">Diagnostic History</h3>
+    <!--HISTÓRICO DE DIAGNÓSTICOS-->
+    <section class="diagnostic-history">
+        <h3 class="history-title">Diagnostic History</h3>
         {% if paciente.diagnoses.exists %}
-        <div style="max-width: 600px; margin: 0 auto; text-align: left; background-color: #666363; padding: 20px; border-radius: 10px;">
-            <ul style="list-style: none; padding: 0;">
+        <div class="history-container">
+            <ul class="diagnostic-list">
                 {% for diagnosis in paciente.diagnoses.all %}
-                <li style="color: #c4bebe; line-height: 1.7; margin-bottom: 10px;">
+                <li class="diagnostic-item">
                     <strong>Date:</strong> {{ diagnosis.date }}<br>
                     <strong>Result:</strong> {{ diagnosis.result }}<br>
                     <strong>Notes:</strong> {{ diagnosis.notes }}
@@ -168,26 +143,28 @@
             </ul>
         </div>
         {% else %}
-        <p style="font-size: 16px; color: #c4bebe; text-align: center;">No diagnostic history available.</p>
+        <p class="no-history-msg">No diagnostic history available.</p>
         {% endif %}
-    </div>
+    </section>
+
 </div>
 
+<!-- SCRIPTS JAVASCRIPT-->
 <script>
+  // Alterna exibição do formulário de adição
 function toggleForm() {
     const form = document.getElementById("add-info-form");
     const button = document.getElementById("add-info-btn");
     form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
     button.style.display = (form.style.display === "block") ? "none" : "block";
 }
-
 function cancelForm() {
     const form = document.getElementById("add-info-form");
     const button = document.getElementById("add-info-btn");
     form.style.display = "none";
     button.style.display = "block";
 }
-
+// Pré-visualização da imagem selecionada
 function previewImage(event) {
     const preview = document.getElementById("image-preview");
     preview.innerHTML = '';
@@ -199,22 +176,21 @@ function previewImage(event) {
         preview.appendChild(img);
     }
 }
-
+// Exibe ou esconde o modal de exclusão
 function showDeleteModal(imageId) {
     document.getElementById(`deleteModal-${imageId}`).style.display = 'flex';
 }
-
 function cancelDelete(imageId) {
     document.getElementById(`deleteModal-${imageId}`).style.display = 'none';
 }
-
+// Retorna o token CSRF
 function getCSRFToken() {
     return document.querySelector('[name=csrfmiddlewaretoken]').value;
 }
-
+// Alterna exibição do diagnóstico
 function toggleDiagnostic(button) {
     const diagnosticResult = button.parentElement.querySelector(".diagnostic-result");
-    if (diagnosticResult.style.display === "none") {
+    if (diagnosticResult.style.display === "none" || diagnosticResult.style.display === "") {
         diagnosticResult.style.display = "inline";
         button.textContent = "Hide Diagnosis";
     } else {
@@ -222,8 +198,7 @@ function toggleDiagnostic(button) {
         button.textContent = "See Diagnosis";
     }
 }
-
-// Intercepta o envio do formulário de upload para enviar a imagem e rodar o modelo
+// Envio assíncrono do formulário de upload
 document.getElementById("upload-form").addEventListener("submit", function(event) {
     event.preventDefault();
     const form = event.target;
@@ -238,78 +213,47 @@ document.getElementById("upload-form").addEventListener("submit", function(event
     })
     .then(response => response.json())
     .then(data => {
-        // Espera-se que 'data' contenha: id, image_url, description
+        // Cria e insere o novo card de imagem na galeria
         const gallery = document.querySelector(".image-gallery");
         const card = document.createElement("div");
         card.classList.add("image-card");
         card.id = "image-card-" + data.id;
-        card.style.cssText = "text-align: center; width: 200px; position: relative; border-radius: 10px; overflow: hidden; background-color: #464444;";
-        
-        // Cria o elemento da imagem
-        const img = document.createElement("img");
-        img.src = data.image_url;
-        img.alt = data.description || "";
-        img.classList.add("image-thumbnail");
-        img.style.cssText = "width: 100%; height: 150px; object-fit: cover;";
-        card.appendChild(img);
-        
-        // Adiciona a descrição
-        const p = document.createElement("p");
-        p.style.cssText = "font-size: 14px; color: #c4bebe; margin: 10px 0;";
-        p.textContent = data.description || "";
-        card.appendChild(p);
-        
-        // Botão de remoção
-        const removeSpan = document.createElement("span");
-        removeSpan.classList.add("remove-image");
-        removeSpan.textContent = "X";
-        removeSpan.style.cssText = "position: absolute; top: 10px; right: 10px; cursor: pointer; background-color: #8f3b37; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 18px; font-size: 14px;";
-        removeSpan.onclick = function() {
-            showDeleteModal(data.id);
-        };
-        card.appendChild(removeSpan);
-        
-        // Seção de diagnóstico
-        const diagnosticDiv = document.createElement("div");
-        diagnosticDiv.classList.add("diagnostic");
-        diagnosticDiv.style.cssText = "padding: 10px 15px; background-color: #464444; border-top: 1px solid #464444; border-radius: 0 0 10px 10px;";
-        const pDiag = document.createElement("p");
-        pDiag.style.cssText = "font-size: 14px; color: #c4bebe;";
-        pDiag.innerHTML = "<strong>Diagnosis:</strong> <span class='diagnostic-result' style='display: none; color: #8f3b37; font-weight: 700;'></span>";
-        diagnosticDiv.appendChild(pDiag);
-        const diagButton = document.createElement("button");
-        diagButton.type = "button";
-        diagButton.textContent = "See Diagnosis";
-        diagButton.style.cssText = "background-color:  rgb(204, 131, 113); color: white; font-size: 14px; border: none; border-radius: 20px; padding: 5px 15px; cursor: pointer;";
-        diagButton.onclick = function() {
-            toggleDiagnostic(diagButton);
-        };
-        diagnosticDiv.appendChild(diagButton);
-        card.appendChild(diagnosticDiv);
-        
+        card.innerHTML = `
+            <img src="${data.image_url}" alt="${data.description || ''}" class="image-thumbnail">
+            <p class="image-description">${data.description || ''}</p>
+            <span class="remove-image" onclick="showDeleteModal('${data.id}')">X</span>
+            <div id="deleteModal-${data.id}" class="modal">
+                <div class="modal-content">
+                    <h2>Are you sure you want to delete this X-Ray?</h2>
+                    <button class="button danger" onclick="deleteImage('${data.id}')">Yes, Delete</button>
+                    <button class="button" onclick="cancelDelete('${data.id}')">Cancel</button>
+                </div>
+            </div>
+            <div class="diagnostic">
+                <p><strong>Diagnosis:</strong> <span class="diagnostic-result" style="display: none; color: var(--accent-color); font-weight: 700;"></span></p>
+                <button type="button" class="btn diagnostic-btn" onclick="toggleDiagnostic(this)">See Diagnosis</button>
+            </div>
+        `;
         if (gallery) {
             gallery.appendChild(card);
         } else {
             const newGallery = document.createElement("div");
             newGallery.classList.add("image-gallery");
-            newGallery.style.cssText = "display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;";
             newGallery.appendChild(card);
             const uploadedImagesDiv = document.querySelector(".uploaded-images");
             uploadedImagesDiv.innerHTML = "";
             uploadedImagesDiv.appendChild(newGallery);
         }
-        
-        // Limpa o input e o preview
+        // Limpa os campos de upload e preview
         document.getElementById("upload-image").value = "";
         document.getElementById("image-preview").innerHTML = "";
         
-        // Executa o modelo automaticamente para a nova imagem
+        // Executa o modelo para a nova imagem
         const diagnosticResultSpan = card.querySelector(".diagnostic-result");
         fetch(`/accounts/run_model/${data.id}`)
             .then(response => response.json())
             .then(modelData => {
                 diagnosticResultSpan.textContent = "Previsão: " + modelData.prediction;
-                // O resultado permanece oculto até o clique em "See Diagnosis"
             })
             .catch(error => console.error("Erro ao executar o modelo:", error));
     })
@@ -320,61 +264,366 @@ document.getElementById("upload-form").addEventListener("submit", function(event
 });
 </script>
 
+
 <style>
+/* VARIÁVEIS DE CORES E TIPOGRAFIA */
+:root {
+    --primary-color: #2e2e2e;   /* Caixas principais um pouco mais claras */
+    --secondary-color: #242424; /* Caixas secundárias */
+    --accent-color: #b44f4f;    /* Cor de destaque */
+    --text-color: #ffffff;      /* Texto branco */
+    --light-color: #b0b0b0;     
+    --background-color: #000000;
+    --modal-bg: rgba(0, 0, 0, 0.8);
+}
+body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+/* CONTAINER PRINCIPAL & TÍTULOS */
+.container.main-container {
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 1200px;
+    background-color: var(--background-color);
+}
+.page-title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 48px;
+    color: var(--text-color);
+}
+
+/* MENSAGENS DE SUCESSO */
+ul.messages {
+    max-width: 600px;
+    margin: 20px auto;
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+.message-item {
+    color: var(--text-color);
+    padding: 12px 20px;
+    margin-bottom: 12px;
+
+    transition: opacity 0.5s ease;
+}
+
+/* CARTÕES & INFORMAÇÕES DO PACIENTE*/
+.patient-info .patient-card {
+    padding: 30px;
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    margin: 0 auto 40px;
+}
+.card-header {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+.card-body p {
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+.card-body span {
+    color: var(--text-color);
+}
+
+/* INFORMAÇÕES ADICIONAIS & FORMULÁRIO */
+.additional-infos h4 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-color);
+}
+.info-list {
+    list-style: none;
+    padding: 0;
+}
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.btn {
+    padding: 10px 20px;
+    border: none;
+
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+.add-info-btn {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+.add-info-btn:hover {
+    background-color: #3a3a3a;
+}
+.remove-btn {
+    background-color: var(--accent-color);
+    color: var(--text-color);
+}
+.remove-btn:hover {
+    background-color: #a075d9;
+}
+.add-info-form {
+    margin-top: 20px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 18px;
+    color: var(--text-color);
+}
+.form-control {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #333;
+
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+.form-actions {
+    margin-top: 20px;
+}
+.save-info-btn {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+.save-info-btn:hover {
+    background-color: #3a3a3a;
+}
+.cancel-info-btn {
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    margin-left: 12px;
+}
+.cancel-info-btn:hover {
+    background-color: #b43a3a;
+}
+
+/* UPLOAD DA RADIOGRAFIA */
+.upload-section {
+    text-align: center;
+    margin-bottom: 60px;
+}
+.upload-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 16px;
+}
+.upload-description {
+    font-size: 18px;
+    color: var(--light-color);
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+.upload-container {
+    background-color: var(--primary-color);
+    padding: 30px;
+
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+.upload-box {
+    border: 2px dashed var(--text-color);
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    background-color: var(--primary-color);
+    transition: background-color 0.3s ease;
+}
+.upload-box:hover {
+    background-color: #696666;
+}
+#upload-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.image-preview img {
+    width: 100%;
+
+    margin-top: 12px;
+}
+.upload-btn {
+    margin-top: 20px;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+.upload-btn:hover {
+    background-color: #3a3a3a;
+}
+
+/* GALERIA DE IMAGENS & MODAIS */
+.uploaded-images {
+    text-align: center;
+    margin-bottom: 60px;
+}
+.gallery-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+.image-card {
+    width: 220px;
+    background-color: var(--primary-color);
+
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+.image-thumbnail {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+.image-description {
+    font-size: 16px;
+    color: var(--text-color);
+    padding: 10px;
+}
+.remove-image {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--accent-color);
+    color: var(--text-color);
+    width: 24px;
+    height: 24px;
+
+    text-align: center;
+    line-height: 24px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Modais */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--modal-bg);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
-
 .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    background-color: var(--primary-color);
+    padding: 30px;
+    border-radius: 8px;
     text-align: center;
     max-width: 400px;
-    width: 100%;
+    width: 90%;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.8);
+    color: var(--text-color);
 }
-
 .button {
-    font-size: 14px;
+    font-size: 16px;
     padding: 10px 20px;
     border: none;
-    border-radius: 20px;
-    cursor: pointer;
-}
-
-.button.danger {
-    background-color: #485188;
-    color: white;
-}
-
-.button:hover {
-    background-color: #9b9797;
-    color: white;
-}
-
-.upload-box {
-    border: 2px dashed #485188;
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    border-radius: 10px;
-    background-color: #ebe5e5;
+    border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+.button.danger {
+    background-color: #cc3300;
+    color: #fff;
+}
+.button:hover {
+    background-color: #b32d00;
+}
 
-.upload-box:hover {
-    background-color: #645f5f;
+/* DIAGNÓSTICO */
+.diagnostic {
+    padding: 12px 16px;
+    background-color: var(--primary-color);
+    border-top: 1px solid #333;
+}
+.diagnostic p {
+    font-size: 16px;
+    margin: 0;
+    color: var(--text-color);
+}
+.btn.diagnostic-btn {
+    margin-top: 8px;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+.btn.diagnostic-btn:hover {
+    background-color: #3a3a3a;
+}
+
+/* HISTÓRICO DE DIAGNÓSTICOS */
+.diagnostic-history {
+    text-align: center;
+    margin-top: 60px;
+}
+.history-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+.history-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background-color: var(--primary-color);
+    padding: 30px;
+
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+.diagnostic-list {
+    list-style: none;
+    padding: 0;
+}
+.diagnostic-item {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+    .container.main-container {
+        padding: 20px;
+    }
+    .patient-info .patient-card,
+    .upload-container,
+    .history-container {
+        margin: 0 10px;
+    }
+    .image-card {
+        width: 45%;
+    }
 }
 </style>
 {% endblock %}

@@ -230,13 +230,13 @@ a.active {
 }
 
 .patient-card {
-    background-color: #222;
+    background-color: #000000;
     padding: 15px;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease;
 }
 
