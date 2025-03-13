@@ -15,7 +15,7 @@ python src/model_trainval.py \
  --results_dir '/nas-ctm01/datasets/public/MEDICAL/mrsilvares/results' \
  --weights_dir '/nas-ctm01/datasets/public/MEDICAL/mrsilvares/results/weights' \
  --history_dir '/nas-ctm01/datasets/public/MEDICAL/mrsilvares/results/history' \
- --data_augmentation True \
+ --data_augmentation \
  --model_name 'OpenCVXRayNN' \
  --dataset_name 'OpenCVXray' \
  --channels 3 \
