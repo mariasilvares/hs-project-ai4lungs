@@ -4,25 +4,7 @@
 
 {% block content %}
 <div class="profile-container" style="margin-top: 120px; font-family: 'Arial', sans-serif; background-color: #000000; padding: 20px;">
-    
-    <!-- Exibe a mensagem de sucesso, se houver -->
-    {% if messages %}
-    <ul class="messages" style="max-width: 600px; margin: 70px auto; list-style: none; padding: 0; text-align: center;">
-        {% for message in messages %}
-        <li class="message-item" style="background-color: #6f8eaf; color: white; padding: 10px 15px; margin-bottom: 10px; border-radius: 10px;">
-            {{ message }}
-        </li>
-        {% endfor %}
-    </ul>
-    <script>
-        setTimeout(function () {
-            const messageItems = document.querySelectorAll('.message-item');
-            messageItems.forEach(function (item) {
-                item.style.display = 'none';
-            });
-        }, 5000);
-    </script>
-    {% endif %}
+
 
     <!-- Cabeçalho do Perfil -->
     <div class="profile-header" style="display: flex; align-items: center; margin-bottom: 20px;">

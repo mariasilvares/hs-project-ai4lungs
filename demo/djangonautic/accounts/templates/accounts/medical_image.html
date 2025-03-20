@@ -2,20 +2,7 @@
 
 {% block content %}
 <div class="container main-container">
-  
-    <!-- Mensagens de Sucesso -->
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li class="message-item">{{ message }}</li>
-        {% endfor %}
-    </ul>
-    <script>
-        setTimeout(function () {
-            document.querySelectorAll('.message-item').forEach(item => item.style.opacity = 0);
-        }, 5000);
-    </script>
-    {% endif %}
+
 
     <!-- Título da Página -->
     <h1 class="page-title">Individual Patient Page</h1>
@@ -51,7 +38,7 @@
                 </div>
 
                 <!-- Formulário de Adição de Informações (inicialmente oculto) -->
-                <div id="add-info-form" class="add-info-form">
+                <div id="add-info-form" class="add-info-form" style="display: none;">
                     <form method="post" action="{% url 'accounts:add_patient_info' paciente.id %}">
                         {% csrf_token %}
                         <div class="form-group">
@@ -97,7 +84,7 @@
     {% if images %}
     <div class="image-gallery">
         {% for image in images %}
-        <div class="image-card" id="image-card-{{ image.id }}">
+        <div class="image-card" id="image-card-{{ image.id }}" data-image-id="{{ image.id }}">
             <figure>
                 <img src="{{ image.image.url }}" alt="{{ image.description }}" class="image-thumbnail">
                 <figcaption class="image-description">{{ image.description }}</figcaption>
@@ -105,11 +92,11 @@
             <!-- Ações do Cartão -->
             <div class="card-actions">
                 <button class="btn remove-btn" onclick="showDeleteModal('{{ image.id }}')">Remove</button>
-                <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this)">See Diagnosis</button>
+                <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '{{ image.id }}')">See Diagnosis</button>
             </div>
             <!-- Seção de Diagnóstico -->
             <div class="diagnostic">
-                <p><strong>Diagnosis:</strong> <span class="diagnostic-result"></span></p>
+                <p><strong>Diagnosis:</strong> <span class="diagnostic-result">{% if image.diagnosis %}{{ image.diagnosis }}{% endif %}</span></p>
             </div>
             <!-- Modal de Confirmação para Exclusão -->
             <div id="deleteModal-{{ image.id }}" class="modal">
@@ -150,20 +137,114 @@
 </div>
 
 <!-- SCRIPTS JAVASCRIPT-->
-<script>
-  // Alterna exibição do formulário de adição
+    <script>
+        function getCSRFToken() {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+        return cookieValue || '';
+    }
+    document.getElementById("upload-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Mostrar indicador de carregamento
+    const uploadBtn = form.querySelector('.upload-btn');
+    const originalBtnText = uploadBtn.textContent;
+    uploadBtn.textContent = "Enviando...";
+    uploadBtn.disabled = true;
+    
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Adicionar mensagem de sucesso
+        const messagesContainer = document.querySelector('.messages-container');
+        if (!messagesContainer) {
+            // Criar container se não existir
+            const newContainer = document.createElement('div');
+            newContainer.className = 'messages-container';
+            document.querySelector('.main-container').prepend(newContainer);
+        }
+        
+        const successMessage = document.createElement('div');
+        successMessage.className = 'alert alert-success';
+        successMessage.textContent = 'Imagem carregada com sucesso!';
+        document.querySelector('.messages-container').appendChild(successMessage);
+        
+        // Remover mensagem após 5 segundos
+        setTimeout(() => {
+            successMessage.remove();
+        }, 5000);
+
+        // Resto do código para adicionar a imagem na galeria...
+    })
+    .catch(error => {
+        // Adicionar mensagem de erro
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'alert alert-danger';
+        errorMessage.textContent = 'Erro ao carregar imagem!';
+        document.querySelector('.messages-container').appendChild(errorMessage);
+        
+        setTimeout(() => {
+            errorMessage.remove();
+        }, 5000);
+    })
+    .finally(() => {
+        uploadBtn.textContent = originalBtnText;
+        uploadBtn.disabled = false;
+    });
+});
+// Alterna exibição do formulário de adição
 function toggleForm() {
     const form = document.getElementById("add-info-form");
     const button = document.getElementById("add-info-btn");
     form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
     button.style.display = (form.style.display === "block") ? "none" : "block";
 }
+
 function cancelForm() {
     const form = document.getElementById("add-info-form");
     const button = document.getElementById("add-info-btn");
     form.style.display = "none";
     button.style.display = "block";
 }
+
+// Função para remover uma informação
+function removeInfo(infoId) {
+    if (confirm("Are you sure you want to remove this information?")) {
+        fetch(`/accounts/delete_patient_info/${infoId}/`, {
+            method: 'DELETE',  // Alterado de POST para DELETE
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            const infoItem = document.getElementById(`info-item-${infoId}`);
+            infoItem.remove();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.error || 'Error removing information. Please try again.');
+        });
+    }
+}
+
 // Pré-visualização da imagem selecionada
 function previewImage(event) {
     const preview = document.getElementById("image-preview");
@@ -176,33 +257,106 @@ function previewImage(event) {
         preview.appendChild(img);
     }
 }
+
 // Exibe ou esconde o modal de exclusão
 function showDeleteModal(imageId) {
     document.getElementById(`deleteModal-${imageId}`).style.display = 'flex';
 }
+
 function cancelDelete(imageId) {
     document.getElementById(`deleteModal-${imageId}`).style.display = 'none';
 }
+
 // Retorna o token CSRF
 function getCSRFToken() {
     return document.querySelector('[name=csrfmiddlewaretoken]').value;
 }
+
 // Alterna exibição do diagnóstico
-function toggleDiagnostic(button) {
-    const diagnosticResult = button.parentElement.querySelector(".diagnostic-result");
-    if (diagnosticResult.style.display === "none" || diagnosticResult.style.display === "") {
-        diagnosticResult.style.display = "inline";
-        button.textContent = "Hide Diagnosis";
+function toggleDiagnostic(button, imageId) {
+    const diagnosticSection = button.closest('.image-card').querySelector(".diagnostic");
+    const diagnosticResult = diagnosticSection.querySelector(".diagnostic-result");
+    
+    if (diagnosticResult.textContent === "") {
+        // Se o diagnóstico ainda não foi carregado, carregue-o
+        loadDiagnostic(imageId, diagnosticResult, button);
     } else {
-        diagnosticResult.style.display = "none";
-        button.textContent = "See Diagnosis";
+        // Caso contrário, apenas alterne a visibilidade
+        if (diagnosticSection.style.display === "none" || diagnosticSection.style.display === "") {
+            diagnosticSection.style.display = "block";
+            button.textContent = "Hide Diagnosis";
+        } else {
+            diagnosticSection.style.display = "none";
+            button.textContent = "See Diagnosis";
+        }
     }
 }
+
+// Função para carregar o diagnóstico de uma imagem
+function loadDiagnostic(imageId, resultElement, button) {
+    button.textContent = "Loading...";
+    button.disabled = true;
+    
+    fetch(`/accounts/run_model/${imageId}/`)
+        .then(response => response.json())
+        .then(data => {
+            resultElement.textContent = data.prediction;
+            resultElement.closest('.diagnostic').style.display = "block";
+            button.textContent = "Hide Diagnosis";
+            button.disabled = false;
+        })
+        .catch(error => {
+            console.error("Erro ao carregar diagnóstico:", error);
+            resultElement.textContent = "Error loading diagnosis";
+            resultElement.closest('.diagnostic').style.display = "block";
+            button.textContent = "Hide Diagnosis";
+            button.disabled = false;
+        });
+}
+
+// Função para deletar uma imagem
+function deleteImage(imageId) {
+    fetch(`/accounts/delete_image/${imageId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            const card = document.getElementById(`image-card-${imageId}`);
+            card.remove();
+            document.getElementById(`deleteModal-${imageId}`).style.display = 'none';
+            
+            // Verificar se ainda há imagens na galeria
+            const gallery = document.querySelector('.image-gallery');
+            if (gallery && gallery.children.length === 0) {
+                const section = document.querySelector('.uploaded-images');
+                section.innerHTML = '<h3 class="gallery-title">Uploaded X-Rays</h3><p class="no-images-msg">No images uploaded for this patient</p>';
+            }
+        } else {
+            alert('Error deleting the image. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error deleting the image. Please try again.');
+    });
+}
+
 // Envio assíncrono do formulário de upload
 document.getElementById("upload-form").addEventListener("submit", function(event) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
+    
+    // Mostrar indicador de carregamento
+    const uploadBtn = form.querySelector('.upload-btn');
+    const originalBtnText = uploadBtn.textContent;
+    uploadBtn.textContent = "Uploading...";
+    uploadBtn.disabled = true;
+    
     fetch(form.action, {
         method: "POST",
         body: formData,
@@ -218,10 +372,19 @@ document.getElementById("upload-form").addEventListener("submit", function(event
         const card = document.createElement("div");
         card.classList.add("image-card");
         card.id = "image-card-" + data.id;
+        card.dataset.imageId = data.id;
         card.innerHTML = `
-            <img src="${data.image_url}" alt="${data.description || ''}" class="image-thumbnail">
-            <p class="image-description">${data.description || ''}</p>
-            <span class="remove-image" onclick="showDeleteModal('${data.id}')">X</span>
+            <figure>
+                <img src="${data.image_url}" alt="${data.description || ''}" class="image-thumbnail">
+                <figcaption class="image-description">${data.description || ''}</figcaption>
+            </figure>
+            <div class="card-actions">
+                <button class="btn remove-btn" onclick="showDeleteModal('${data.id}')">Remove</button>
+                <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '${data.id}')">See Diagnosis</button>
+            </div>
+            <div class="diagnostic">
+                <p><strong>Diagnosis:</strong> <span class="diagnostic-result">${data.diagnosis || ''}</span></p>
+            </div>
             <div id="deleteModal-${data.id}" class="modal">
                 <div class="modal-content">
                     <h2>Are you sure you want to delete this X-Ray?</h2>
@@ -229,37 +392,49 @@ document.getElementById("upload-form").addEventListener("submit", function(event
                     <button class="button" onclick="cancelDelete('${data.id}')">Cancel</button>
                 </div>
             </div>
-            <div class="diagnostic">
-                <p><strong>Diagnosis:</strong> <span class="diagnostic-result" style="display: none; color: var(--accent-color); font-weight: 700;"></span></p>
-                <button type="button" class="btn diagnostic-btn" onclick="toggleDiagnostic(this)">See Diagnosis</button>
-            </div>
         `;
+        
+        // Verificar se a galeria existe e adicionar o novo card
         if (gallery) {
             gallery.appendChild(card);
+            // Se esta foi a primeira imagem, remover a mensagem "No images"
+            const noImagesMsg = document.querySelector('.no-images-msg');
+            if (noImagesMsg) {
+                noImagesMsg.remove();
+            }
         } else {
+            // Criar uma nova galeria se não existir
             const newGallery = document.createElement("div");
             newGallery.classList.add("image-gallery");
             newGallery.appendChild(card);
             const uploadedImagesDiv = document.querySelector(".uploaded-images");
-            uploadedImagesDiv.innerHTML = "";
+            uploadedImagesDiv.innerHTML = '<h3 class="gallery-title">Uploaded X-Rays</h3>';
             uploadedImagesDiv.appendChild(newGallery);
         }
+        
         // Limpa os campos de upload e preview
         document.getElementById("upload-image").value = "";
         document.getElementById("image-preview").innerHTML = "";
         
-        // Executa o modelo para a nova imagem
-        const diagnosticResultSpan = card.querySelector(".diagnostic-result");
-        fetch(`/accounts/run_model/${data.id}`)
-            .then(response => response.json())
-            .then(modelData => {
-                diagnosticResultSpan.textContent = "Previsão: " + modelData.prediction;
-            })
-            .catch(error => console.error("Erro ao executar o modelo:", error));
+        // Resetar o botão de upload
+        uploadBtn.textContent = originalBtnText;
+        uploadBtn.disabled = false;
     })
     .catch(error => {
         console.error("Erro ao enviar a imagem:", error);
         alert("Error uploading image. Please try again.");
+        uploadBtn.textContent = originalBtnText;
+        uploadBtn.disabled = false;
+    });
+});
+
+// Quando a página carregar, configurar a exibição dos diagnósticos
+window.addEventListener('DOMContentLoaded', function() {
+    // Esconder as seções de diagnóstico inicialmente
+    document.querySelectorAll('.diagnostic').forEach(section => {
+        if (section.querySelector('.diagnostic-result').textContent.trim() === '') {
+            section.style.display = 'none';
+        }
     });
 });
 </script>
@@ -308,7 +483,6 @@ ul.messages {
     color: var(--text-color);
     padding: 12px 20px;
     margin-bottom: 12px;
-
     transition: opacity 0.5s ease;
 }
 
@@ -354,7 +528,6 @@ ul.messages {
 .btn {
     padding: 10px 20px;
     border: none;
-
     cursor: pointer;
     transition: background-color 0.3s ease;
     font-size: 16px;
@@ -390,7 +563,6 @@ ul.messages {
     padding: 10px;
     font-size: 16px;
     border: 1px solid #333;
-
     background-color: var(--primary-color);
     color: var(--text-color);
 }
@@ -433,7 +605,6 @@ ul.messages {
 .upload-container {
     background-color: var(--primary-color);
     padding: 30px;
-
     max-width: 500px;
     margin: 0 auto;
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
@@ -460,7 +631,6 @@ ul.messages {
 }
 .image-preview img {
     width: 100%;
-
     margin-top: 12px;
 }
 .upload-btn {
@@ -492,7 +662,6 @@ ul.messages {
 .image-card {
     width: 220px;
     background-color: var(--primary-color);
-
     overflow: hidden;
     position: relative;
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
@@ -506,20 +675,6 @@ ul.messages {
     font-size: 16px;
     color: var(--text-color);
     padding: 10px;
-}
-.remove-image {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--accent-color);
-    color: var(--text-color);
-    width: 24px;
-    height: 24px;
-
-    text-align: center;
-    line-height: 24px;
-    font-size: 16px;
-    cursor: pointer;
 }
 
 /* Modais */
@@ -564,7 +719,7 @@ ul.messages {
 /* DIAGNÓSTICO */
 .diagnostic {
     padding: 12px 16px;
-    background-color: var(--primary-color);
+    background-color: var(--secondary-color);
     border-top: 1px solid #333;
 }
 .diagnostic p {
@@ -597,7 +752,6 @@ ul.messages {
     margin: 0 auto;
     background-color: var(--primary-color);
     padding: 30px;
-
     text-align: left;
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
@@ -623,6 +777,52 @@ ul.messages {
     }
     .image-card {
         width: 45%;
+    }
+}
+
+/*mensagem*/
+.messages-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 600px;
+}
+
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-size: 16px;
+    text-align: center;
+    animation: slideIn 0.3s ease-out;
+}
+
+.alert-info-added {
+    background-color: #6f8eaf; 
+    border-color: #6f8eaf;
+}
+
+.alert-image-uploaded {
+    background-color: #6f8eaf; 
+    border-color: #6f8eaf;
+}
+.alert-danger {
+    background-color: #662222;
+    color: white;
+    border: 1px solid #662222;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 </style>

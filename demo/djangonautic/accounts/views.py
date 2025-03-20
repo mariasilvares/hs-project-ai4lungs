@@ -7,6 +7,7 @@ from .models import Patient, MedicalImage, Activity, PatientInfo
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from accounts.inference import predict_xray
+import os
 
 # Create your views here.
 def signup_view(request):
@@ -61,8 +62,8 @@ def profile_edit(request):
                 additional_info="Change in user profile."
             )
 
-            messages.success(request, "Profile updated with success!")
-            return redirect('profile')  # Redireciona para o perfil após salvar
+            messages.success(request, "Perfil atualizado com sucesso!", extra_tags='profile_updated')
+            return redirect('profile')
         else:
             messages.error(request, "An error occurred when updating the profile. Check the fields and try again.")
     else:
@@ -94,8 +95,8 @@ def pacientes(request):
                 additional_info="A new patient has been registered."
             )
 
-            messages.success(request, 'Patient added with success!')
-            return render(request, 'accounts/pacientes.html', {'form': form, 'pacientes': pacientes})
+        messages.success(request, 'Paciente adicionado com sucesso!', extra_tags='patient_added')
+        return redirect('accounts:pacientes')   
     else:
         form = PatientForm()
 
@@ -119,9 +120,8 @@ def excluir_paciente(request, paciente_id):
         )
 
 
-        messages.success(request, 'Patient deleted with success!')
-        return redirect('accounts:pacientes')  # Redireciona para a lista de pacientes
-
+        messages.success(request, 'Paciente removido com sucesso!', extra_tags='patient_deleted')
+        return redirect('accounts:pacientes')   
     return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
 
 
@@ -132,60 +132,100 @@ def add_patient_info(request, paciente_id):
         title = request.POST.get('title')
         description = request.POST.get('description')
 
-        # Cria e salva as informações adicionais
         PatientInfo.objects.create(patient=paciente, title=title, description=description)
         
-        # Registra a atividade
-        Activity.objects.create(
-            user=request.user,
-            action=f"Added Information for the Patient {paciente.name}",
-        )
-    
-        # Redireciona para a página de detalhes do paciente
+        # Mensagem modificada com tag específica
+        messages.success(request, "Informação adicionada com sucesso!", extra_tags='info_added')
+        
         return redirect('accounts:upload_image', paciente_id=paciente.id)
     
     return render(request, 'accounts/add_patient_info.html', {'paciente': paciente})
 
-
+@csrf_exempt
 def delete_patient_info(request, info_id):
     if request.method == 'DELETE':
         try:
+            # Adicione verificação de permissão
             info = PatientInfo.objects.get(id=info_id)
+            if info.patient.user != request.user:
+                return JsonResponse({'error': 'Permission denied.'}, status=403)
+                
             info.delete()
             return JsonResponse({'message': 'Information deleted successfully.'}, status=200)
         except PatientInfo.DoesNotExist:
             return JsonResponse({'error': 'Information not found.'}, status=404)
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
 def upload_image(request, paciente_id):
+    import logging
+    logger = logging.getLogger('upload_view')
+    
     paciente = get_object_or_404(Patient, id=paciente_id)
     
     if request.method == 'POST' and 'image' in request.FILES:
-        uploaded_file = request.FILES['image']
-        new_image = MedicalImage.objects.create(patient=paciente, image=uploaded_file)
-        
-        # Registrar a atividade de upload
-        Activity.objects.create(
-            user=request.user,
-            action=f"Upload of {paciente.name}'s X-Ray",
-        )
-        
-        messages.success(request, 'Image uploaded with success!')
-        
-        # Se a requisição for AJAX, retorna os dados da imagem em JSON
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            data = {
-                'id': new_image.id,
-                'image_url': new_image.image.url,
-                # Caso a imagem possua uma descrição, caso contrário, retorna uma string vazia
-                'description': new_image.description if hasattr(new_image, 'description') else ""
-            }
+        try:
+            uploaded_file = request.FILES['image']
+            
+            # Cria nova imagem
+            new_image = MedicalImage.objects.create(
+                patient=paciente, 
+                image=uploaded_file,
+                description=request.POST.get('description', '')
+            )
+            logger.info(f"Imagem criada: ID={new_image.id}, Caminho={new_image.image.path}")
+            
+            # Garante que o arquivo foi salvo antes de prosseguir
+            if not os.path.exists(new_image.image.path):
+                logger.error(f"Arquivo não encontrado após upload: {new_image.image.path}")
+                raise FileNotFoundError(f"Arquivo da imagem não encontrado: {new_image.image.path}")
+            
+            # Executa modelo automaticamente ao fazer upload
+            try:
+                result = predict_xray(new_image.image.path)
+                logger.info(f"Resultado da predição: {result}")
+                
+                # Verifica se o resultado é válido
+                if isinstance(result, int) and result in {0, 1, 2}:
+                    label_map = {0: 'covid', 1: 'pneumonia', 2: 'normal'}
+                    new_image.diagnosis = label_map[result]
+                    logger.info(f"Diagnóstico definido: {new_image.diagnosis}")
+                else:
+                    logger.warning(f"Resultado inválido do modelo: {result}")
+                    new_image.diagnosis = "erro"
+            except Exception as e:
+                logger.error(f"Erro ao executar predição: {e}", exc_info=True)
+                new_image.diagnosis = "erro"
+            
+            # Salva a imagem com o diagnóstico
+            new_image.save()
+            
+            # Registra atividade
+            Activity.objects.create(
+                user=request.user,
+                action=f"Upload of {paciente.name}'s X-Ray",
+            )
+
+            # Adiciona a mensagem de sucesso
+            messages.success(request, "imagem carregada com sucesso!")
+            
+            # Resposta para requisições AJAX
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                data = {
+                    'id': new_image.id,
+                    'image_url': new_image.image.url,
+                    'diagnosis': new_image.diagnosis
+                }
+                    
+            messages.success(request, "Imagem carregada com sucesso!", extra_tags='image_uploaded')
             return JsonResponse(data)
-    
+                
+        except Exception as e:
+            logger.error(f"Erro no upload: {e}", exc_info=True)
+            messages.error(request, f'Error uploading image: {str(e)}')
+            
+    # Resposta padrão para GET ou erros
     images = MedicalImage.objects.filter(patient=paciente)
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
-
 
 def delete_image(request, image_id):
     if request.method == 'DELETE':
@@ -205,5 +245,9 @@ def run_model(request, image_id):
     
     label_map = {0: 'covid', 1: 'pneumonia', 2: 'normal'}
     result_label = label_map[result]
+    
+    # Atualiza o diagnóstico da imagem
+    image.diagnosis = result_label
+    image.save()
     
     return JsonResponse({"prediction": result_label})

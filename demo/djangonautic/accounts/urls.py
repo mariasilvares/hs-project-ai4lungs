@@ -20,7 +20,7 @@ urlpatterns = [
     path('upload_image/<int:paciente_id>/', views.upload_image, name='upload_image'), 
     path('add_patient_info/<int:paciente_id>/', views.add_patient_info, name='add_patient_info'),
     path('patients/<int:paciente_id>/add_info/', views.add_patient_info, name='add_patient_info'),
-    path('delete_image/<int:image_id>/', views.delete_image, name='delete_image'),
+    path('delete_patient_info/<int:info_id>/', views.delete_patient_info, name='delete_patient_info'),
     path('delete_patient_info/<int:info_id>/', views.delete_patient_info, name='delete_patient_info'),
 
     # Processamento de Imagem

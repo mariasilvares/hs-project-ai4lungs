@@ -40,6 +40,42 @@
         </div>
     </div>
 
+    {% if messages %}
+<div class="global-messages">
+    {% for message in messages %}
+    <div class="alert 
+        {% if 'info_added' in message.tags %}alert-info-added
+        {% elif 'image_uploaded' in message.tags %}alert-image-uploaded
+        {% elif 'profile_updated' in message.tags %}alert-profile-updated
+        {% elif 'patient_added' in message.tags %}alert-patient-added
+        {% elif 'patient_deleted' in message.tags %}alert-patient-deleted
+        {% else %}alert-generic{% endif %}">
+        
+        {% if 'info_added' in message.tags %}
+            {{ message }}
+        {% elif 'image_uploaded' in message.tags %}
+            {{ message }}
+        {% elif 'profile_updated' in message.tags %}
+            {{ message }}
+        {% elif 'patient_added' in message.tags %}
+            {{ message }}
+        {% elif 'patient_deleted' in message.tags %}
+            {{ message }}
+        {% else %}
+            {{ message }}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+<script>
+    // Esconder automaticamente após 5 segundos
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(alert => {
+            alert.style.display = 'none';
+        });
+    }, 5000);
+</script>
+{% endif %}
     {% block content %}
     {% endblock %}
 </div>
@@ -50,14 +86,13 @@
         const modal = document.getElementById('logoutModal');
         const cancelButton = document.getElementById('cancel-logout');
 
-        // Exibir o modal quando o botão de logout for clicado
-        logoutButton.addEventListener('click', function () {
-            modal.style.display = 'flex';  // Exibe o modal
+        logoutButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            modal.style.display = 'flex';
         });
 
-        // Fechar o modal quando o botão de cancelar for clicado
         cancelButton.addEventListener('click', function () {
-            modal.style.display = 'none';  // Oculta o modal
+            modal.style.display = 'none';
         });
     });
 </script>
@@ -114,6 +149,38 @@
 
 .btn:hover {
     background: linear-gradient(to right, #8b9ba7, #6f8eaf); /* Efeito de hover */
+}
+
+.global-messages {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 90%;
+    max-width: 600px;
+}
+
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+    animation: slideIn 0.3s ease-out;
+    color: white;
+}
+
+.alert-info-added { background-color: #6f8eaf; border: 1px solid #6f8eaf; }
+.alert-image-uploaded { background-color: #6f8eaf; border: 1px solid #6f8eaf; }
+.alert-profile-updated { background-color: #6f8eaf; border: 1px solid #6f8eaf; }
+.alert-patient-added { background-color: #6f8eaf; border: 1px solid #6f8eaf; }
+.alert-patient-deleted { background-color: #6f8eaf; border: 1px solid #6f8eaf; }
+.alert-generic { background-color: #6f8eaf; border: 1px solid #6f8eaf; }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </body>
