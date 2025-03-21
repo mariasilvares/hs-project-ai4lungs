@@ -75,23 +75,23 @@ echo "Job started!"
 
 
 
-# # DenseNet121OpenCVXRayNN com Data Augmentation
-# python src/model_trainval.py \
-#  --gpu_id 0 \
-#  --seed 42 \
-#  --results_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results' \
-#  --weights_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights' \
-#  --history_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/history' \
-#  --data_augmentation \
-#  --model_name 'DenseNet121OpenCVXRayNN' \
-#  --dataset_name 'OpenCVXray' \
-#  --channels 3 \
-#  --height 64 \
-#  --width 64 \
-#  --nr_classes 3 \
-#  --epochs 1 \
-#  --batch_size 32 \
-#  --base_data_path '/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray'  # Caminho base dos dados
+# DenseNet121OpenCVXRayNN com Data Augmentation
+python src/model_trainval.py \
+ --gpu_id 0 \
+ --seed 42 \
+ --results_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results' \
+ --weights_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/weights' \
+ --history_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/history' \
+ --data_augmentation \
+ --model_name 'DenseNet121OpenCVXRayNN' \
+ --dataset_name 'OpenCVXray' \
+ --channels 3 \
+ --height 64 \
+ --width 64 \
+ --nr_classes 3 \
+ --epochs 1 \
+ --batch_size 32 \
+ --base_data_path '/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray'  # Caminho base dos dados
 
 
 # DenseNet121OpenCVXRayNN sem Data Augmentation
@@ -106,7 +106,7 @@ python src/model_trainval.py \
  --channels 3 \
  --height 64 \
  --width 64 \
- --nr_classes 1 \
+ --nr_classes 3 \
  --epochs 1 \
  --batch_size 32 \
  --base_data_path '/home/mariareissilvares/Documents/hs-project-ai4lungs/data/DatasetOpenCVXray'
@@ -121,10 +121,11 @@ python src/model_trainval.py \
  --history_dir '/home/mariareissilvares/Documents/hs-project-ai4lungs/results/history' \
  --data_augmentation \
  --model_name 'DenseNet121ChestXRayNN' \
+  --dataset_name 'ChestXRayAbnormalities' \
  --channels 3 \
  --height 64 \
  --width 64 \
- --nr_classes 1 \
+ --nr_classes 3 \
  --epochs 3 \
  --batch_size 32 \
  --base_data_path '/home/mariareissilvares/Documents/hs-project-ai4lungs/data/PulmonaryChestXRaAbnormalities'
@@ -142,7 +143,7 @@ python src/model_trainval.py \
  --channels 3 \
  --height 64 \
  --width 64 \
- --nr_classes 1 \
+ --nr_classes 3 \
  --epochs 3 \
  --batch_size 32 \
  --base_data_path '/home/mariareissilvares/Documents/hs-project-ai4lungs/data/PulmonaryChestXRaAbnormalities'
