@@ -91,7 +91,7 @@
                 <!-- Ações do Cartão -->
                 <div class="card-actions">
                     <button class="btn remove-btn" onclick="showDeleteModal('{{ image.id }}')">Remove</button>
-                    <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '{{ image.id }}')">See Diagnosis</button>
+                    <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '{{ image.id }}')">Hide Diagnosis</button>
                 </div>
                 <!-- Seção de Diagnóstico -->
                 <div class="diagnostic">
@@ -313,7 +313,7 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
                 </figure>
                 <div class="card-actions">
                     <button class="btn remove-btn" onclick="showDeleteModal('${data.id}')">Remove</button>
-                    <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '${data.id}')">See Diagnosis</button>
+                    <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '${data.id}')">Hide Diagnosis</button>
                 </div>
                 <div class="diagnostic">
                     <p><strong>Diagnosis:</strong> <span class="diagnostic-result">${data.diagnosis || ''}</span></p>
