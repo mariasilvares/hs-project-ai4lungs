@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 # Project Imports
-from model_utilities import ChestXRayNN, OpenCVXRayNN
+from model_utilities import ChestXRayNN, OpenCVXRayNN,DenseNet121ChestXRayNN, DenseNet121OpenCVXRayNN
 from dataset_utilities import ChestXRayAbnormalities, OpenCVXray
 
 def main():
@@ -25,7 +25,7 @@ def main():
     parser.add_argument('--weights_dir', type=str, required=True, help='Directory for loading model weights.')
     parser.add_argument('--history_dir', type=str, required=True, help='Directory for saving test history.')
     parser.add_argument("--data_augmentation", action="store_true", help="Enable data augmentation")
-    parser.add_argument('--model_name', type=str, choices=['OpenCVXRayNN', 'ChestXRayNN'], required=True, help='Name of the model to be used')
+    parser.add_argument('--model_name', type=str, choices=['OpenCVXRayNN', 'ChestXRayNN', 'DenseNet121ChestXRayNN', 'DenseNet121OpenCVXRayNN'], required=True, help='Name of the model to be used')
     parser.add_argument('--dataset_name', type=str, required=True, help='The dataset for the experiments.')
     parser.add_argument('--channels', type=int, default=3, help="Número de canais da imagem.")
     parser.add_argument('--height', type=int, default=64, help="Altura da imagem de entrada.")
@@ -54,17 +54,23 @@ def main():
 
     if args.data_augmentation:
         model_path = os.path.join(weights_dir, f"{args.model_name.lower()}_val_{args.dataset_name.lower()}_da.pt")
-    else:
+    else: 
         model_path = os.path.join(weights_dir, f"{args.model_name.lower()}_val_{args.dataset_name.lower()}.pt")
+
     
     # Inicializa o modelo conforme o argumento
+
     if args.model_name == "ChestXRayNN":
         model = ChestXRayNN(channels=args.channels, height=args.height, width=args.width, nr_classes=args.nr_classes)
     elif args.model_name == "OpenCVXRayNN":
         model = OpenCVXRayNN(channels=args.channels, height=args.height, width=args.width, nr_classes=args.nr_classes)
+    elif args.model_name == "DenseNet121ChestXRayNN":
+        model = DenseNet121ChestXRayNN(channels=args.channels, height=args.height, width=args.width, nr_classes=args.nr_classes)
+    elif args.model_name == "DenseNet121OpenCVXRayNN":
+        model = DenseNet121OpenCVXRayNN(channels=args.channels, height=args.height, width=args.width, nr_classes=args.nr_classes)
     else:
         raise ValueError(f"Modelo desconhecido: {args.model_name}")
-    
+        
     # Define as transformações para teste
     MEAN = [0.485, 0.456, 0.406]
     STD = [0.229, 0.224, 0.225]
