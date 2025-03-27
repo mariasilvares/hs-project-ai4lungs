@@ -125,21 +125,21 @@ def excluir_paciente(request, paciente_id):
     return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
 
 
-def add_patient_info(request, paciente_id):
-    paciente = Patient.objects.get(id=paciente_id)
-    
+def add_information(request, patient_id):
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
+        patient = Patient.objects.get(id=patient_id)
+        
+        # Salvar as informações no banco de dados
+        PatientInfo.objects.create(patient=patient, title=title, description=description)
 
-        PatientInfo.objects.create(patient=paciente, title=title, description=description)
-        
-        # Mensagem modificada com tag específica
-        messages.success(request, "Informação adicionada com sucesso!", extra_tags='info_added')
-        
-        return redirect('accounts:upload_image', paciente_id=paciente.id)
-    
-    return render(request, 'accounts/add_patient_info.html', {'paciente': paciente})
+        # Redirecionar de volta à página do paciente com as novas informações
+        return redirect('patient_detail', patient_id=patient_id)
+
+    # Renderizar a página caso o método não seja POST
+    patient = Patient.objects.get(id=patient_id)
+    return render(request, 'medical_image.html', {'patient': patient})
 
 @csrf_exempt
 def delete_patient_info(request, info_id):
@@ -205,19 +205,17 @@ def upload_image(request, paciente_id):
                 action=f"Upload of {paciente.name}'s X-Ray",
             )
 
-            # Adiciona a mensagem de sucesso
-            messages.success(request, "imagem carregada com sucesso!")
-            
-            # Resposta para requisições AJAX
+            # Se a requisição for AJAX, não adiciona mensagens para evitar que fiquem na sessão
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 data = {
                     'id': new_image.id,
                     'image_url': new_image.image.url,
                     'diagnosis': new_image.diagnosis
                 }
-                    
-            messages.success(request, "Imagem carregada com sucesso!", extra_tags='image_uploaded')
-            return JsonResponse(data)
+                return JsonResponse(data)
+            else:
+                messages.success(request, "Imagem carregada com sucesso!", extra_tags='image_uploaded')
+                return redirect('accounts:upload_image', paciente_id=paciente.id)
                 
         except Exception as e:
             logger.error(f"Erro no upload: {e}", exc_info=True)
@@ -228,14 +226,25 @@ def upload_image(request, paciente_id):
     return render(request, 'accounts/medical_image.html', {'paciente': paciente, 'images': images})
 
 def delete_image(request, image_id):
-    if request.method == 'DELETE':
-        try:
-            image = MedicalImage.objects.get(id=image_id)
-            image.delete()
-            return JsonResponse({'message': 'Image deleted successfully.'}, status=200)
-        except MedicalImage.DoesNotExist:
-            return JsonResponse({'error': 'Image not found.'}, status=404)
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+    if request.method == "POST":  # Certifique-se de que está recebendo uma requisição POST
+        image = get_object_or_404(MedicalImage, id=image_id)
+
+        # Utiliza o atributo correto 'image' em vez de 'filepath'
+        if image.image:
+            image_path = image.image.path
+
+            try:
+                if os.path.exists(image_path):
+                    os.remove(image_path)  # Exclui o arquivo físico
+                image.delete()  # Remove do banco de dados
+
+                return JsonResponse({"success": True})
+            except Exception as e:
+                return JsonResponse({"success": False, "error": str(e)})
+        else:
+            return JsonResponse({"success": False, "error": "No image file found."})
+
+    return JsonResponse({"success": False, "error": "Invalid request"})
 
 
 def run_model(request, image_id):
