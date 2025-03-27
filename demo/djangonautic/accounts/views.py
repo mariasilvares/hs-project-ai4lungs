@@ -125,21 +125,32 @@ def excluir_paciente(request, paciente_id):
     return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
 
 
-def add_information(request, patient_id):
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        patient = Patient.objects.get(id=patient_id)
-        
-        # Salvar as informações no banco de dados
-        PatientInfo.objects.create(patient=patient, title=title, description=description)
 
-        # Redirecionar de volta à página do paciente com as novas informações
-        return redirect('patient_detail', patient_id=patient_id)
+def add_patient_info(request, paciente_id):
+    paciente = Patient.objects.get(id=paciente_id)
+    
+    title = request.POST.get('title')
+    description = request.POST.get('description')
 
-    # Renderizar a página caso o método não seja POST
-    patient = Patient.objects.get(id=patient_id)
-    return render(request, 'medical_image.html', {'patient': patient})
+    # Create the new patient info
+    patient_info = PatientInfo.objects.create(
+        patient=paciente, 
+        title=title, 
+        description=description
+    )
+    
+    # Check if it's an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Return JSON response for AJAX
+        return JsonResponse({
+            'id': patient_info.id,
+            'title': patient_info.title,
+            'description': patient_info.description
+        })
+    
+    # Traditional form submission
+    messages.success(request, "Informação adicionada com sucesso!", extra_tags='info_added')
+    return redirect('accounts:upload_image', paciente_id=paciente.id)
 
 @csrf_exempt
 def delete_patient_info(request, info_id):
@@ -155,6 +166,8 @@ def delete_patient_info(request, info_id):
         except PatientInfo.DoesNotExist:
             return JsonResponse({'error': 'Information not found.'}, status=404)
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
 
 def upload_image(request, paciente_id):
     import logging

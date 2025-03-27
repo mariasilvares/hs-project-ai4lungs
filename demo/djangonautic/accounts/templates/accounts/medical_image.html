@@ -137,6 +137,112 @@
 
 <!-- SCRIPTS JAVASCRIPT-->
 <script>
+    function removeInfo(infoId) {
+    if (confirm("Are you sure you want to remove this information?")) {
+        fetch(`/accounts/delete_patient_info/${infoId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            const infoItem = document.getElementById(`info-item-${infoId}`);
+            if (infoItem) {
+                infoItem.remove();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.error || 'Error removing information. Please try again.');
+        });
+    }
+}
+
+// Modify the form submission to handle the response and dynamically add the new info
+document.getElementById("add-info-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Create the new info item dynamically
+        const additionalInfosContainer = document.querySelector('.additional-infos');
+        
+        // If additional-infos div doesn't exist, create it
+        if (!additionalInfosContainer) {
+            const newContainer = document.createElement('div');
+            newContainer.className = 'additional-infos';
+            
+            const titleHeader = document.createElement('h4');
+            titleHeader.textContent = 'Additional Information:';
+            
+            const infoList = document.createElement('ul');
+            infoList.className = 'info-list';
+            
+            newContainer.appendChild(titleHeader);
+            newContainer.appendChild(infoList);
+            
+            const addInfoBtnContainer = document.getElementById('add-info-btn-container');
+            addInfoBtnContainer.parentNode.insertBefore(newContainer, addInfoBtnContainer);
+        }
+        
+        // Find or create the info list
+        const infoList = document.querySelector('.additional-infos .info-list') || 
+            document.createElement('ul');
+        infoList.className = 'info-list';
+        
+        // Create the new list item
+        const newInfoItem = document.createElement('li');
+        newInfoItem.id = `info-item-${data.id}`;
+        newInfoItem.className = 'info-item';
+        newInfoItem.innerHTML = `
+            <div>
+                <strong>${data.title}:</strong> ${data.description}
+            </div>
+            <button onclick="removeInfo('${data.id}')" class="btn remove-btn">Remove</button>
+        `;
+        
+        // Append the new info item
+        infoList.appendChild(newInfoItem);
+        
+        // Ensure the additional-infos div exists and contains the list
+        const additionalInfos = document.querySelector('.additional-infos');
+        if (additionalInfos && !additionalInfos.querySelector('.info-list')) {
+            additionalInfos.appendChild(infoList);
+        }
+        
+        // Reset the form and hide it
+        form.reset();
+        toggleForm();
+        
+        // Optional: Show a success message
+        showMessage('Information added successfully!', 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding information. Please try again.');
+    });
+});
     // Função para exibir mensagens na tela com o estilo adequado
     function showMessage(text, type) {
         let container = document.querySelector('.messages-container');
