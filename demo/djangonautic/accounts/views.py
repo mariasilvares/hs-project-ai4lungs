@@ -62,7 +62,7 @@ def profile_edit(request):
                 additional_info="Change in user profile."
             )
 
-            messages.success(request, "Perfil atualizado com sucesso!", extra_tags='profile_updated')
+            messages.success(request, "Profile successfully updated!", extra_tags='profile_updated')
             return redirect('profile')
         else:
             messages.error(request, "An error occurred when updating the profile. Check the fields and try again.")
@@ -95,7 +95,7 @@ def pacientes(request):
                 additional_info="A new patient has been registered."
             )
 
-        messages.success(request, 'Paciente adicionado com sucesso!', extra_tags='patient_added')
+        messages.success(request, 'Patient successfully added!', extra_tags='patient_added')
         return redirect('accounts:pacientes')   
     else:
         form = PatientForm()
@@ -120,7 +120,7 @@ def excluir_paciente(request, paciente_id):
         )
 
 
-        messages.success(request, 'Paciente removido com sucesso!', extra_tags='patient_deleted')
+        messages.success(request, 'Patient successfully removed!', extra_tags='patient_deleted')
         return redirect('accounts:pacientes')   
     return render(request, 'accounts/excluir_paciente.html', {'paciente': paciente})
 
@@ -149,7 +149,7 @@ def add_patient_info(request, paciente_id):
         })
     
     # Traditional form submission
-    messages.success(request, "Informação adicionada com sucesso!", extra_tags='info_added')
+    messages.success(request, "Information successfully added!", extra_tags='info_added')
     return redirect('accounts:upload_image', paciente_id=paciente.id)
 
 @csrf_exempt
@@ -189,8 +189,8 @@ def upload_image(request, paciente_id):
             
             # Garante que o arquivo foi salvo antes de prosseguir
             if not os.path.exists(new_image.image.path):
-                logger.error(f"Arquivo não encontrado após upload: {new_image.image.path}")
-                raise FileNotFoundError(f"Arquivo da imagem não encontrado: {new_image.image.path}")
+                logger.error(f"File not found after upload: {new_image.image.path}")
+                raise FileNotFoundError(f"Image file not found: {new_image.image.path}")
             
             # Executa modelo automaticamente ao fazer upload
             try:
@@ -227,7 +227,7 @@ def upload_image(request, paciente_id):
                 }
                 return JsonResponse(data)
             else:
-                messages.success(request, "Imagem carregada com sucesso!", extra_tags='image_uploaded')
+                messages.success(request, "Image uploaded successfully!", extra_tags='image_uploaded')
                 return redirect('accounts:upload_image', paciente_id=paciente.id)
                 
         except Exception as e:

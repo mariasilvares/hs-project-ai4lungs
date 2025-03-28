@@ -9,7 +9,7 @@
     <!--  INFORMAÇÕES DO PACIENTE-->
     <section class="patient-info">
         <div class="card patient-card">
-            <div class="card-header">Informations</div>
+            <div class="card-header">Information</div>
             <div class="card-body">
                 <p><strong>Patient name:</strong> <span>{{ paciente.name }}</span></p>
                 <p><strong>Patient number:</strong> <span>{{ paciente.number }}</span></p>
@@ -113,25 +113,7 @@
         {% endif %}
     </section>
 
-    <!--HISTÓRICO DE DIAGNÓSTICOS-->
-    <section class="diagnostic-history">
-        <h3 class="history-title">Diagnostic History</h3>
-        {% if paciente.diagnoses.exists %}
-        <div class="history-container">
-            <ul class="diagnostic-list">
-                {% for diagnosis in paciente.diagnoses.all %}
-                <li class="diagnostic-item">
-                    <strong>Date:</strong> {{ diagnosis.date }}<br>
-                    <strong>Result:</strong> {{ diagnosis.result }}<br>
-                    <strong>Notes:</strong> {{ diagnosis.notes }}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% else %}
-        <p class="no-history-msg">No diagnostic history available.</p>
-        {% endif %}
-    </section>
+
 
 </div>
 
@@ -298,7 +280,7 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
         .then(response => response.json())
         .then(data => {
             // Exibe a mensagem de sucesso via JS
-            showMessage('Imagem carregada com sucesso!', 'success');
+            showMessage('Image uploaded successfully!', 'success');
 
             // Adiciona o novo card de imagem à galeria
             const gallery = document.querySelector(".image-gallery");
@@ -492,7 +474,7 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
                 button.disabled = false;
             })
             .catch(error => {
-                console.error("Erro ao carregar diagnóstico:", error);
+                console.error("Error loading diagnostics:", error);
                 resultElement.textContent = "Error loading diagnosis";
                 resultElement.closest('.diagnostic').style.display = "block";
                 button.textContent = "Hide Diagnosis";

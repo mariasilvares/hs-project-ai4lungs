@@ -2,34 +2,34 @@
 
 {% block content %}
 <div class="container" style="margin-top: 0px; background-color: #000000; padding: 40px 0;">
-    <h1 class="text-center" style="margin-bottom: 40px; font-size: 40px; color: #f1f1f1;">Gestão de Pacientes</h1>
+    <h1 class="text-center" style="margin-bottom: 40px; font-size: 40px; color: #f1f1f1;">Patient Management</h1>
 
 
     <!-- Formulário para adicionar pacientes -->
     <div class="add-patient-form" style="background-color: #272829; padding: 30px 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.678); max-width: 600px; margin: 0 auto 60px auto;">
-        <h2 style="color: #f1f1f1; text-align: center; margin-bottom: 25px;">Adicionar Paciente</h2>
+        <h2 style="color: #f1f1f1; text-align: center; margin-bottom: 25px;">Add Patient</h2>
         <form method="post">
             {% csrf_token %}
             <div style="line-height: 1.8; color: #f1f1f1;">
                 {{ form.as_p }}
             </div>
             <button type="submit" class="btn" style="margin-top: 20px; padding: 12px 30px; background-color: #6f8eaf; color: white; border: none; font-size: 16px; cursor: pointer;">
-            Adicionar Paciente
+                Add Patient
             </button>
         </form>
     </div>
 
     <!-- Lista de pacientes -->
-    <h2 class="text-center" style="font-size: 30px; color: #f1f1f1; margin-bottom: 40px;">Lista de Pacientes</h2>
+    <h2 class="text-center" style="font-size: 30px; color: #f1f1f1; margin-bottom: 40px;">Patient List</h2>
     <div class="patients-list-container" style="background-color: black; display: flex; flex-direction: column; gap: 20px; justify-content: flex-start; margin-bottom: 200px;">
         {% if pacientes %}
         <table class="table" style="width: 80%; max-width: 800px; margin: 0 auto; color: #f1f1f1; border-collapse: collapse;">
             <thead>
                 <tr>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Nome</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Name</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">ID</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Data de Registo</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Ações</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Registration Date</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,10 +40,10 @@
                     <td style="padding: 10px;">{{ paciente.registration_date|date:"d/m/Y" }}</td>
                     <td style="padding: 10px;">
                         <a href="{% url 'accounts:upload_image' paciente.id %}" class="btn view-images" style="padding: 8px 16px; background-color: #6f8eaf; color: white; border: none; font-size: 14px; text-decoration: none; cursor: pointer; margin-right: 10px;">
-                            <i class="fa fa-image"></i> Visualizar Imagens
+                            <i class="fa fa-image"></i> View images
                         </a>
                         <button type="button" class="btn delete" style="padding: 8px 16px; background-color: #8f3b37; color: white; border: none; font-size: 14px; cursor: pointer;" onclick="openDeleteModal('{{ paciente.id }}')">
-                            <i class="fa fa-trash"></i> Remover
+                            <i class="fa fa-trash"></i> Remove
                         </button>
                     </td>
                 </tr>
@@ -51,22 +51,22 @@
             </tbody>
         </table>
         {% else %}
-        <div class="no-patients" style="text-align: center; color: #f1f1f1; font-size: 16px; margin-top: 40px;">Nenhum paciente adicionado ainda.</div>
+        <div class="no-patients" style="text-align: center; color: #f1f1f1; font-size: 16px; margin-top: 40px;">No patients added yet</div>
         {% endif %}
     </div>
 
     <!-- Modal de confirmação de exclusão -->
     <div id="deletePatientModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h2 style="color: rgb(0, 0, 0);">Tem certeza de que deseja excluir este paciente?</h2>
+            <h2 style="color: rgb(0, 0, 0);">Are you sure you want to exclude this patient?</h2>
             <form id="deleteForm" method="post">
                 {% csrf_token %}
                 <button type="submit" id="confirm-delete" style="padding: 12px 25px; background-color:#6f8eaf; color: white; border: none; font-size: 14px; cursor: pointer;">
-                    Sim, Excluir
+                    Yes, Exclude
                 </button>
             </form>
             <button id="cancel-delete" style="padding: 12px 25px; background-color: #9b9797; color: white; border: none; font-size: 14px; cursor: pointer;" onclick="closeDeleteModal()">
-                Cancelar
+                Cancel
             </button>
         </div>
     </div>
@@ -75,7 +75,7 @@
     // Centraliza o modal e exibe
     function openDeleteModal(pacienteId) {
         const modal = document.getElementById('deletePatientModal');
-        document.getElementById('deleteForm').action = "{% url 'accounts:excluir_paciente' 0 %}".replace('0', pacienteId); // Define a ação com o ID do paciente
+        document.getElementById('deleteForm').action = "{% url 'accounts:excluir_paciente' 0 %}".replace('0', pacienteId);
         modal.style.display = 'flex'; // Mostra o modal
     }
 

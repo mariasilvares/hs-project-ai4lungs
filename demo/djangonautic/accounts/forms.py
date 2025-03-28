@@ -19,8 +19,8 @@ class PatientForm(forms.ModelForm):
         model = Patient
         fields = ['name', 'number']
         labels = {
-            'name': 'Nome',
-            'number': 'Número',
+            'name': 'Name',
+            'number': 'Number',
         }
 
 class MedicalImageForm(forms.ModelForm):
