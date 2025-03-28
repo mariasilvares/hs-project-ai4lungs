@@ -2,11 +2,7 @@
 
 {% block content %}
 <div class="container main-container">
-
-    <!-- Título da Página -->
-    <h1 class="page-title">Individual Patient Page</h1>
-
-    <!--  INFORMAÇÕES DO PACIENTE-->
+    <!-- INFORMAÇÕES DO PACIENTE -->
     <section class="patient-info">
         <div class="card patient-card">
             <div class="card-header">Informations</div>
@@ -21,10 +17,13 @@
                     <ul class="info-list">
                         {% for info in paciente.patientinfo_set.all %}
                         <li id="info-item-{{ info.id }}" class="info-item">
-                            <div>
-                                <strong>{{ info.title }}:</strong> {{ info.description }}
+                            <p>
+                                <strong>{{ info.title }}:</strong> 
+                                <span>{{ info.description }}</span>
+                            </p>
+                            <div class="info-remove">
+                                <button onclick="removeInfo('{{ info.id }}')" class="btn remove-btn">Remove</button>
                             </div>
-                            <button onclick="removeInfo('{{ info.id }}')" class="btn remove-btn">Remove</button>
                         </li>
                         {% endfor %}
                     </ul>
@@ -58,7 +57,7 @@
         </div>
     </section>
 
-    <!--  UPLOAD DA RADIOGRAFIA-->
+    <!-- UPLOAD DA RADIOGRAFIA -->
     <section class="upload-section">
         <h3 class="upload-title">Upload X-Ray</h3>
         <p class="upload-description">
@@ -91,7 +90,7 @@
                 <!-- Ações do Cartão -->
                 <div class="card-actions">
                     <button class="btn remove-btn" onclick="showDeleteModal('{{ image.id }}')">Remove</button>
-                    <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '{{ image.id }}')">Hide Diagnosis</button>
+                    <button class="btn diagnostic-btn" onclick="toggleDiagnostic(this, '{{ image.id }}')">See Diagnosis</button>
                 </div>
                 <!-- Seção de Diagnóstico -->
                 <div class="diagnostic">
@@ -113,7 +112,7 @@
         {% endif %}
     </section>
 
-    <!--HISTÓRICO DE DIAGNÓSTICOS-->
+    <!-- HISTÓRICO DE DIAGNÓSTICOS -->
     <section class="diagnostic-history">
         <h3 class="history-title">Diagnostic History</h3>
         {% if paciente.diagnoses.exists %}
@@ -135,115 +134,111 @@
 
 </div>
 
-<!-- SCRIPTS JAVASCRIPT-->
+<!-- SCRIPTS JAVASCRIPT -->
 <script>
+    // Função para remover uma informação
     function removeInfo(infoId) {
-    if (confirm("Are you sure you want to remove this information?")) {
-        fetch(`/accounts/delete_patient_info/${infoId}/`, {
-            method: 'DELETE',
+        if (confirm("Are you sure you want to remove this information?")) {
+            fetch(`/accounts/delete_patient_info/${infoId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                const infoItem = document.getElementById(`info-item-${infoId}`);
+                if (infoItem) {
+                    infoItem.remove();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.error || 'Error removing information. Please try again.');
+            });
+        }
+    }
+
+    // Envio do formulário para adicionar nova informação
+    document.getElementById("add-info-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: "POST",
+            body: formData,
             headers: {
-                'X-CSRFToken': getCSRFToken()
-            }
+                'X-CSRFToken': getCSRFToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => { throw err; });
+                throw new Error('Network response was not ok');
             }
             return response.json();
         })
         .then(data => {
-            const infoItem = document.getElementById(`info-item-${infoId}`);
-            if (infoItem) {
-                infoItem.remove();
+            // Cria o novo item de informação no formato "tabela" (3 colunas)
+            let additionalInfosContainer = document.querySelector('.additional-infos');
+            if (!additionalInfosContainer) {
+                additionalInfosContainer = document.createElement('div');
+                additionalInfosContainer.className = 'additional-infos';
+                
+                const titleHeader = document.createElement('h4');
+                titleHeader.textContent = 'Additional Information:';
+                
+                const infoList = document.createElement('ul');
+                infoList.className = 'info-list';
+                
+                additionalInfosContainer.appendChild(titleHeader);
+                additionalInfosContainer.appendChild(infoList);
+                
+                const addInfoBtnContainer = document.getElementById('add-info-btn-container');
+                addInfoBtnContainer.parentNode.insertBefore(additionalInfosContainer, addInfoBtnContainer);
             }
+            
+            let infoList = document.querySelector('.additional-infos .info-list');
+            if (!infoList) {
+                infoList = document.createElement('ul');
+                infoList.className = 'info-list';
+                additionalInfosContainer.appendChild(infoList);
+            }
+            
+            // Novo item = nova "linha"
+            const newInfoItem = document.createElement('li');
+            newInfoItem.id = `info-item-${data.id}`;
+            newInfoItem.className = 'info-item';
+            newInfoItem.innerHTML = `
+                <div class="info-label">
+                    <strong>${data.title}:</strong>
+                </div>
+                <div class="info-value">
+                    ${data.description}
+                </div>
+                <div class="info-remove">
+                    <button onclick="removeInfo('${data.id}')" class="btn remove-btn">Remove</button>
+                </div>
+            `;
+            
+            infoList.appendChild(newInfoItem);
+            form.reset();
+            toggleForm();
+            showMessage('Information added successfully!', 'success');
         })
         .catch(error => {
             console.error('Error:', error);
-            alert(error.error || 'Error removing information. Please try again.');
+            alert('Error adding information. Please try again.');
         });
-    }
-}
-
-// Modify the form submission to handle the response and dynamically add the new info
-document.getElementById("add-info-form").addEventListener("submit", function(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    
-    fetch(form.action, {
-        method: "POST",
-        body: formData,
-        headers: {
-            'X-CSRFToken': getCSRFToken(),
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Create the new info item dynamically
-        const additionalInfosContainer = document.querySelector('.additional-infos');
-        
-        // If additional-infos div doesn't exist, create it
-        if (!additionalInfosContainer) {
-            const newContainer = document.createElement('div');
-            newContainer.className = 'additional-infos';
-            
-            const titleHeader = document.createElement('h4');
-            titleHeader.textContent = 'Additional Information:';
-            
-            const infoList = document.createElement('ul');
-            infoList.className = 'info-list';
-            
-            newContainer.appendChild(titleHeader);
-            newContainer.appendChild(infoList);
-            
-            const addInfoBtnContainer = document.getElementById('add-info-btn-container');
-            addInfoBtnContainer.parentNode.insertBefore(newContainer, addInfoBtnContainer);
-        }
-        
-        // Find or create the info list
-        const infoList = document.querySelector('.additional-infos .info-list') || 
-            document.createElement('ul');
-        infoList.className = 'info-list';
-        
-        // Create the new list item
-        const newInfoItem = document.createElement('li');
-        newInfoItem.id = `info-item-${data.id}`;
-        newInfoItem.className = 'info-item';
-        newInfoItem.innerHTML = `
-            <div>
-                <strong>${data.title}:</strong> ${data.description}
-            </div>
-            <button onclick="removeInfo('${data.id}')" class="btn remove-btn">Remove</button>
-        `;
-        
-        // Append the new info item
-        infoList.appendChild(newInfoItem);
-        
-        // Ensure the additional-infos div exists and contains the list
-        const additionalInfos = document.querySelector('.additional-infos');
-        if (additionalInfos && !additionalInfos.querySelector('.info-list')) {
-            additionalInfos.appendChild(infoList);
-        }
-        
-        // Reset the form and hide it
-        form.reset();
-        toggleForm();
-        
-        // Optional: Show a success message
-        showMessage('Information added successfully!', 'success');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error adding information. Please try again.');
     });
-});
-    // Função para exibir mensagens na tela com o estilo adequado
+
+    // Função para exibir mensagens na tela
     function showMessage(text, type) {
         let container = document.querySelector('.messages-container');
         if (!container) {
@@ -252,7 +247,6 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
             document.body.prepend(container);
         }
         const message = document.createElement('div');
-        // Se for sucesso, usa o estilo "alert-info-added" para o retângulo azul
         if (type === 'success') {
             message.className = 'alert alert-info-added';
         } else if (type === 'danger') {
@@ -297,10 +291,8 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
         })
         .then(response => response.json())
         .then(data => {
-            // Exibe a mensagem de sucesso via JS
             showMessage('Imagem carregada com sucesso!', 'success');
 
-            // Adiciona o novo card de imagem à galeria
             const gallery = document.querySelector(".image-gallery");
             const card = document.createElement("div");
             card.classList.add("image-card");
@@ -369,98 +361,7 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
         button.style.display = "block";
     }
 
-    // Função para remover uma informação
-    function removeInfo(infoId) {
-        if (confirm("Are you sure you want to remove this information?")) {
-            fetch(`/accounts/delete_patient_info/${infoId}/`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': getCSRFToken()
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => { throw err; });
-                }
-                return response.json();
-            })
-            .then(data => {
-                const infoItem = document.getElementById(`info-item-${infoId}`);
-                infoItem.remove();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(error.error || 'Error removing information. Please try again.');
-            });
-        }
-    }
-
-    // Pré-visualização da imagem selecionada
-    function previewImage(event) {
-        const preview = document.getElementById("image-preview");
-        preview.innerHTML = '';
-        const file = event.target.files[0];
-        if (file) {
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
-            img.style.width = "100%";
-            preview.appendChild(img);
-        }
-    }
-
-    // Exibe ou esconde o modal de exclusão
-    function showDeleteModal(imageId) {
-        document.getElementById(`deleteModal-${imageId}`).style.display = 'flex';
-    }
-
-    function cancelDelete(imageId) {
-        document.getElementById(`deleteModal-${imageId}`).style.display = 'none';
-    }
-
-    // Função para deletar uma imagem
-    function deleteImage(imageId) {
-        fetch(`/accounts/delete_image/${imageId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCSRFToken()
-            },
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                const card = document.getElementById(`image-card-${imageId}`);
-                if (card) card.remove();
-                const modal = document.getElementById(`deleteModal-${imageId}`);
-                if (modal) modal.style.display = 'none';
-                
-                const gallery = document.querySelector('.image-gallery');
-                if (gallery && gallery.children.length === 0) {
-                    const section = document.querySelector('.uploaded-images');
-                    section.innerHTML = '<h3 class="gallery-title">Uploaded X-Rays</h3><p class="no-images-msg">No images uploaded for this patient</p>';
-                }
-            } else {
-                console.error("Server reported error during deletion:", data.error);
-                const card = document.getElementById(`image-card-${imageId}`);
-                if (card) {
-                    alert('Error deleting the image: ' + data.error);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error during deletion:', error);
-            const card = document.getElementById(`image-card-${imageId}`);
-            if (card) {
-                alert('Error deleting the image. Please try again.');
-            }
-        });
-    }
-
-    // Alterna exibição do diagnóstico
+    // Exibir/ocultar diagnóstico
     function toggleDiagnostic(button, imageId) {
         const diagnosticSection = button.closest('.image-card').querySelector(".diagnostic");
         const diagnosticResult = diagnosticSection.querySelector(".diagnostic-result");
@@ -478,7 +379,7 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
         }
     }
 
-    // Função para carregar o diagnóstico de uma imagem
+    // Carrega o diagnóstico da imagem
     function loadDiagnostic(imageId, resultElement, button) {
         button.textContent = "Loading...";
         button.disabled = true;
@@ -500,7 +401,7 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
             });
     }
 
-    // Ao carregar a página, configura a exibição dos diagnósticos
+    // Ao carregar a página, oculta seções de diagnóstico vazias
     window.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.diagnostic').forEach(section => {
             if (section.querySelector('.diagnostic-result').textContent.trim() === '') {
@@ -521,6 +422,7 @@ document.getElementById("add-info-form").addEventListener("submit", function(eve
     --background-color: #000000;
     --modal-bg: rgba(0, 0, 0, 0.8);
 }
+
 body {
     font-family: 'Roboto', sans-serif;
     color: var(--text-color);
@@ -534,6 +436,7 @@ body {
     max-width: 1200px;
     background-color: var(--background-color);
 }
+
 .page-title {
     text-align: center;
     margin-bottom: 40px;
@@ -541,59 +444,71 @@ body {
     color: var(--text-color);
 }
 
-/* MENSAGENS DE SUCESSO */
-ul.messages {
-    max-width: 600px;
-    margin: 20px auto;
-    list-style: none;
-    padding: 0;
-    text-align: center;
-}
-.message-item {
-    color: var(--text-color);
-    padding: 12px 20px;
-    margin-bottom: 12px;
-    transition: opacity 0.5s ease;
-}
-
-/* CARTÕES & INFORMAÇÕES DO PACIENTE*/
+/* CARTÕES & INFORMAÇÕES DO PACIENTE */
 .patient-info .patient-card {
     padding: 30px;
     background-color: var(--primary-color);
     box-shadow: 0 4px 12px rgba(0,0,0,0.6);
     margin: 0 auto 40px;
 }
+
 .card-header {
     font-size: 28px;
     font-weight: 600;
     margin-bottom: 20px;
     color: var(--text-color);
 }
+
 .card-body p {
     font-size: 18px;
     margin-bottom: 12px;
 }
+
 .card-body span {
     color: var(--text-color);
 }
 
-/* INFORMAÇÕES ADICIONAIS & FORMULÁRIO */
+/* INFORMAÇÕES ADICIONAIS */
 .additional-infos h4 {
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 16px;
     color: var(--text-color);
 }
+
 .info-list {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
-.info-item {
+
+.additional-infos .info-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 18px;
     margin-bottom: 10px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+.additional-infos .info-item p {
+    margin: 0;
+    font-size: 18px;
+}
+
+.additional-infos .info-item strong {
+    margin-right: 10px;
+    color: var(--light-color);
+}
+
+.additional-infos .info-item span {
+    color: var(--text-color);
+    word-break: break-word;
+}
+
+.info-remove {
+    display: flex;
+    align-items: center;
 }
 .btn {
     padding: 10px 20px;
@@ -602,6 +517,7 @@ ul.messages {
     transition: background-color 0.3s ease;
     font-size: 16px;
 }
+
 .add-info-btn {
     background-color: var(--primary-color);
     color: var(--text-color);
@@ -850,7 +766,7 @@ ul.messages {
     }
 }
 
-/*mensagem*/
+/* Mensagens */
 .messages-container {
     position: fixed;
     top: 20px;
