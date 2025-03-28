@@ -5,14 +5,15 @@
 {% block content %}
 <div class="profile-container" style="margin-top: 120px; font-family: 'Arial', sans-serif; background-color: #000000; padding: 20px;">
 
-
     <!-- Cabeçalho do Perfil -->
     <div class="profile-header" style="display: flex; align-items: center; margin-bottom: 20px;">
         <div class="profile-picture" style="flex-shrink: 0; margin-right: 20px;">
             {% if user.userprofile.profile_picture %}
-                <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de perfil" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #8ca8c7;">
+                <img src="{{ user.userprofile.profile_picture.url }}" alt="Foto de perfil" 
+                     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #6f8eaf;">
             {% else %}
-                <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #8ca8c7;">
+                <img src="{% static 'default-profile.png' %}" alt="Imagem padrão" 
+                     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #6f8eaf;">
             {% endif %}
         </div>
         <div class="profile-info" style="color: #c4bebe;">
@@ -23,42 +24,84 @@
     </div>
 
     <!-- Ações do Perfil -->
-    <div class="profile-actions" style="display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 30px;">
-        <a href="{% url 'accounts:profile_edit' %}" class="btn" style="padding: 10px 20px; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
+    <div class="profile-actions" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px;">
+        <a href="{% url 'accounts:profile_edit' %}" class="btn">
             Edit profile
         </a>
-        <a href="{% url 'change_password' %}" class="btn" style="padding: 10px 20px; color: white; border: none; border-radius: 20px; font-size: 14px; text-decoration: none; cursor: pointer; transition: background-color 0.3s ease;">
+        <a href="{% url 'change_password' %}" class="btn">
             Change Password
         </a>
         <form action="{% url 'accounts:logout' %}" method="post" style="margin: 0;">
             {% csrf_token %}
-            <button type="submit" class="btn logout-btn" style="padding: 10px 20px; background-color: #8f3b37; color: white; border: none; border-radius: 20px; font-size: 14px; cursor: pointer; transition: background-color 0.3s ease;">
+            <button type="submit" class="btn btn-danger">
                 Logout
             </button>
         </form>
     </div>
 
     <!-- Histórico de Atividades -->
-<div class="activity-history" style="background-color: #272829; padding: 50px;">
-    <h3 style="color: #ffffff; font-size: 22px; margin-bottom: 20px; text-align: center;">Atividades Recentes</h3>
-    
-    <ul id="activity-list" style="list-style: none; padding: 0; margin: 0;">
-        {% for activity in user.activity_set.all|dictsortreversed:"timestamp" %}
-            <li class="activity-item" style="color: #c4bebe; padding: 10px 0; border-bottom: 1px solid #555555;"
-                {% if forloop.counter > 5 %} hidden {% endif %}>
-                {{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}
-            </li>
-        {% empty %}
-            <li style="color: #c4bebe; text-align: center;">Sem atividades recentes</li>
-        {% endfor %}
-    </ul>
+    <div class="activity-history" style="background-color: #272829; padding: 25px; border-radius: 8px;">
+        <h3 style="color: #ffffff; font-size: 22px; margin-bottom: 20px; text-align: center;">Recent Activities</h3>
+        
+        <ul id="activity-list" style="list-style: none; padding: 0; margin: 0;">
+            {% for activity in user.activity_set.all|dictsortreversed:"timestamp" %}
+                <li class="activity-item" style="color: #c4bebe; padding: 12px 0; border-bottom: 1px solid #555555;"
+                    {% if forloop.counter > 5 %} hidden {% endif %}>
+                    {{ activity.get_action_display }}: {{ activity.timestamp|date:"F j, Y, H:i" }}
+                </li>
+            {% empty %}
+                <li style="color: #c4bebe; text-align: center;">No recent activities</li>
+            {% endfor %}
+        </ul>
 
-    {% if user.activity_set.all|length > 5 %}
-        <button id="toggle-history" style="background-color: transparent; color: #ffffff; border: none; cursor: pointer; margin-bottom: 40px; margin-top: 10px; display: block; text-align: right; width: 100%;">
-            Show All Activities
-        </button>
-    {% endif %}
+        {% if user.activity_set.all|length > 5 %}
+            <button id="toggle-history" class="btn btn-link">
+                Show All Activities
+            </button>
+        {% endif %}
+    </div>
 </div>
+
+<style>
+    .profile-actions .btn {
+        background-color: #6f8eaf;
+        padding: 12px 25px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .profile-actions .btn:hover {
+        background-color: #8b9ba7;
+        transform: scale(1.05);
+    }
+
+    .btn-danger {
+        background-color: #8f3b37;
+    }
+
+    .btn-danger:hover {
+        background-color: #a04541;
+    }
+
+    .btn-link {
+        background: none !important;
+        color: #acb3b9;
+        text-decoration: underline;
+        padding: 5px;
+        margin: 15px auto 0;
+        display: block;
+        width: auto;
+    }
+
+    .btn-link:hover {
+        color: #888f94;
+        transform: none;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+</style>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -66,15 +109,16 @@
         const activities = document.querySelectorAll(".activity-item");
         let expanded = false;
 
-        toggleButton.addEventListener("click", function () {
+        toggleButton?.addEventListener("click", function () {
             activities.forEach((activity, index) => {
                 if (index >= 5) {
                     activity.hidden = expanded;
                 }
             });
             expanded = !expanded;
-            toggleButton.textContent = expanded ? "Show less" : "Show All Activities";
+            toggleButton.textContent = expanded ? "Show Less" : "Show All Activities";
         });
     });
 </script>
-{% endblock %} 
+
+{% endblock %}
